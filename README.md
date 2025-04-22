@@ -20,18 +20,18 @@ An App that stores recipes that are created by yourself or imported from the web
 
 ## Feature List
 
-- [] User authentication
-- [] All recipes page
-  - [] import recipe from the web
-  - [] individual recipes page
-    - [] checklist for cooking
-- [] Store Section
-  - [] recipe packs
-  - [] premium plans
-- [] Grocery Mode
-  - [] Shop for certain recipes
-- [] AI stuff
-  - [] suggestions for alternatives ingredients or more recipes
+- [x] User authentication
+- [ ] All recipes page
+  - [ ] import recipe from the web
+  - [ ] individual recipes page
+    - [ ] checklist for cooking
+- [ ] Store Section
+  - [ ] recipe packs
+  - [ ] premium plans
+- [ ] Grocery Mode
+  - [ ] Shop for certain recipes
+- [ ] AI stuff
+  - [ ] suggestions for alternatives ingredients or more recipes
 
 ## Getting Started
 
