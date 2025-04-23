@@ -5,13 +5,23 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import { useAuth } from '@/context/userAuth';
 import AuthForm from './Form';
 
 export default function AuthPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [mode, setMode] = useState<'login' | 'signup'>('login');
+  const { user } = useAuth();
 
+  // If user is already logged in, redirect to home page
+  useEffect(() => {
+    if (user) {
+      router.push('/');
+    }
+  }, [user, router]);
+
+  // Set mode based on URL query parameter
   useEffect(() => {
     const modeParam = searchParams.get('mode');
     if (modeParam === 'login' || modeParam === 'signup') {
@@ -21,17 +31,6 @@ export default function AuthPage() {
 
   const toggleMode = () => {
     setMode(mode === 'login' ? 'signup' : 'login');
-  };
-
-  const handleSubmit = async (formData: FormData) => {
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-
-    console.log(`${mode} attempt for user: ${email}`);
-
-    setTimeout(() => {
-      router.push('/');
-    }, 1000);
   };
 
   return (
@@ -57,11 +56,7 @@ export default function AuthPage() {
           </Typography>
         </Box>
 
-        <AuthForm
-          mode={mode}
-          onToggleMode={toggleMode}
-          onSubmit={handleSubmit}
-        />
+        <AuthForm mode={mode} onToggleMode={toggleMode} />
       </Box>
     </Container>
   );
