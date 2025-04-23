@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
@@ -8,40 +9,71 @@ import Typography from '@mui/material/Typography';
 import Alert from '@mui/material/Alert';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
+import CircularProgress from '@mui/material/CircularProgress';
+import { useAuth } from '@/context/userAuth';
 
 type AuthMode = 'login' | 'signup';
 
 type FormProps = {
   mode?: AuthMode;
-  onSubmit?: (data: FormData) => void;
   onToggleMode?: () => void;
 };
 
-export default function AuthForm({
-  mode = 'login',
-  onSubmit,
-  onToggleMode,
-}: FormProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+// Form data interface
+interface AuthFormData {
+  email: string;
+  password: string;
+  confirmPassword?: string;
+  name?: string;
+}
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsLoading(true);
-    setError(null);
+export default function AuthForm({ mode = 'login', onToggleMode }: FormProps) {
+  const { login, signup, isLoading, error: authError, clearError } = useAuth();
+  const [formKey, setFormKey] = useState(0);
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+    reset,
+    setError,
+    clearErrors,
+  } = useForm<AuthFormData>({
+    mode: 'onChange',
+    defaultValues: {
+      email: '',
+      password: '',
+      confirmPassword: '',
+      name: '',
+    },
+  });
+
+  // Watch password value for confirm password validation
+  const password = watch('password');
+
+  // Reset form and clear errors when mode changes
+  useEffect(() => {
+    clearError();
+    clearErrors();
+    reset();
+    setFormKey((prev) => prev + 1);
+  }, [mode, clearError, clearErrors, reset]);
+
+  // Form submission handler
+  const onSubmit: SubmitHandler<AuthFormData> = async (data) => {
     try {
-      const formData = new FormData(event.currentTarget);
-      onSubmit?.(formData);
-      // In a real app, you would handle auth here
+      if (mode === 'login') {
+        await login(data.email, data.password);
+      } else {
+        if (data.name) {
+          await signup(data.email, data.password, data.name);
+        }
+      }
     } catch (err) {
-      setError(
-        typeof err === 'string'
-          ? err
-          : 'Authentication failed. Please try again.'
-      );
-    } finally {
-      setIsLoading(false);
+      setError('root', {
+        message: err instanceof Error ? err.message : 'Authentication failed',
+      });
     }
   };
 
@@ -54,14 +86,14 @@ export default function AuthForm({
         {mode === 'login' ? 'Log In' : 'Sign Up'}
       </Typography>
 
-      {error && (
+      {(errors.root?.message || authError) && (
         <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
+          {errors.root?.message || authError}
         </Alert>
       )}
 
-      <Box component="form" onSubmit={handleSubmit} noValidate>
-        <Stack spacing={2}>
+      <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+        <Stack spacing={2} key={formKey}>
           {mode === 'signup' && (
             <TextField
               margin="normal"
@@ -69,9 +101,13 @@ export default function AuthForm({
               fullWidth
               id="name"
               label="Full Name"
-              name="name"
               autoComplete="name"
               autoFocus={mode === 'signup'}
+              error={!!errors.name}
+              helperText={errors.name?.message}
+              {...register('name', {
+                required: 'Name is required',
+              })}
             />
           )}
 
@@ -81,22 +117,49 @@ export default function AuthForm({
             fullWidth
             id="email"
             label="Email Address"
-            name="email"
             autoComplete="email"
             autoFocus={mode === 'login'}
+            error={!!errors.email}
+            helperText={errors.email?.message}
+            {...register('email', {
+              required: 'Email is required',
+              pattern: {
+                value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{1,}$/,
+                message: 'Please enter a valid email address',
+              },
+            })}
           />
 
           <TextField
             margin="normal"
             required
             fullWidth
-            name="password"
             label="Password"
             type="password"
             id="password"
             autoComplete={
               mode === 'login' ? 'current-password' : 'new-password'
             }
+            error={!!errors.password}
+            helperText={errors.password?.message}
+            {...register('password', {
+              required: 'Password is required',
+              minLength: {
+                value: 8,
+                message: 'Password must be at least 8 characters',
+              },
+              validate: {
+                hasUppercase: (value) =>
+                  /[A-Z]/.test(value) ||
+                  'Password must contain at least one uppercase letter',
+                hasLowercase: (value) =>
+                  /[a-z]/.test(value) ||
+                  'Password must contain at least one lowercase letter',
+                hasNumber: (value) =>
+                  /[0-9]/.test(value) ||
+                  'Password must contain at least one number',
+              },
+            })}
           />
 
           {mode === 'signup' && (
@@ -104,11 +167,17 @@ export default function AuthForm({
               margin="normal"
               required
               fullWidth
-              name="confirmPassword"
               label="Confirm Password"
               type="password"
               id="confirmPassword"
               autoComplete="new-password"
+              error={!!errors.confirmPassword}
+              helperText={errors.confirmPassword?.message}
+              {...register('confirmPassword', {
+                required: 'Please confirm your password',
+                validate: (value) =>
+                  value === password || 'Passwords do not match',
+              })}
             />
           )}
 
@@ -117,9 +186,27 @@ export default function AuthForm({
             fullWidth
             variant="contained"
             disabled={isLoading}
-            sx={{ mt: 2, mb: 2 }}
+            sx={{ mt: 2, mb: 2, position: 'relative' }}
           >
-            {isLoading ? 'Loading...' : mode === 'login' ? 'Log In' : 'Sign Up'}
+            {isLoading ? (
+              <>
+                <CircularProgress
+                  size={24}
+                  sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    marginTop: '-12px',
+                    marginLeft: '-12px',
+                  }}
+                />
+                Processing...
+              </>
+            ) : mode === 'login' ? (
+              'Log In'
+            ) : (
+              'Sign Up'
+            )}
           </Button>
         </Stack>
       </Box>
@@ -128,14 +215,14 @@ export default function AuthForm({
         <Typography variant="body2">
           {mode === 'login' ? (
             <>
-              Don't have an account?{' '}
+              Don't have an account?
               <Button onClick={onToggleMode} variant="text" size="small">
                 Sign up
               </Button>
             </>
           ) : (
             <>
-              Already have an account?{' '}
+              Already have an account?
               <Button onClick={onToggleMode} variant="text" size="small">
                 Log in
               </Button>
