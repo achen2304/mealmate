@@ -1,0 +1,17 @@
+[
+  {
+    "userID": "1",
+    "groceryListID": "1",
+    "recipes": ["1", "5"],
+    "combinedIngredients": [
+      { "ingredientID": "1", "amount": 500, "unit": "g", "checked": false },
+      { "ingredientID": "2", "amount": 1, "unit": "can", "checked": true },
+      { "ingredientID": "3", "amount": 2, "unit": "cloves", "checked": false },
+      { "ingredientID": "4", "amount": 1, "unit": "medium", "checked": false },
+      { "ingredientID": "16", "amount": 1, "unit": "cup", "checked": false },
+      { "ingredientID": "17", "amount": 1, "unit": "medium", "checked": false },
+      { "ingredientID": "18", "amount": 2, "unit": "tbsp", "checked": true },
+      { "ingredientID": "19", "amount": 1, "unit": "cup", "checked": false }
+    ]
+  }
+]

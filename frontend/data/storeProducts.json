@@ -1,0 +1,37 @@
+[
+  {
+    "itemID": "1",
+    "itemName": "Monthly Premium Plan",
+    "itemType": "Subscription",
+    "cost": 9.99,
+    "planType": "Monthly"
+  },
+  {
+    "itemID": "2",
+    "itemName": "Italian Cuisine Recipe Book",
+    "itemType": "Recipe Book",
+    "cost": 14.99,
+    "planType": null
+  },
+  {
+    "itemID": "3",
+    "itemName": "Annual Premium Plan",
+    "itemType": "Subscription",
+    "cost": 99.99,
+    "planType": "Annual"
+  },
+  {
+    "itemID": "4",
+    "itemName": "Quick & Easy Meals Recipe Book",
+    "itemType": "Recipe Book",
+    "cost": 12.99,
+    "planType": null
+  },
+  {
+    "itemID": "5",
+    "itemName": "Desserts Recipe Book",
+    "itemType": "Recipe Book",
+    "cost": 11.99,
+    "planType": null
+  }
+]

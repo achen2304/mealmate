@@ -1,0 +1,142 @@
+[
+  {
+    "ingredientID": "1",
+    "name": "Ground Beef",
+    "amount": "500g",
+    "tags": ["meat", "protein"],
+    "category": "meat"
+  },
+  {
+    "ingredientID": "2",
+    "name": "Canned Tomatoes",
+    "amount": "400g",
+    "tags": ["canned", "vegetable"],
+    "category": "produce"
+  },
+  {
+    "ingredientID": "3",
+    "name": "Garlic",
+    "amount": "1 bulb",
+    "tags": ["vegetable", "seasoning"],
+    "category": "produce"
+  },
+  {
+    "ingredientID": "4",
+    "name": "Onion",
+    "amount": "1 medium",
+    "tags": ["vegetable"],
+    "category": "produce"
+  },
+  {
+    "ingredientID": "5",
+    "name": "Avocado",
+    "amount": "1 piece",
+    "tags": ["fruit", "healthy"],
+    "category": "produce"
+  },
+  {
+    "ingredientID": "6",
+    "name": "Whole Grain Bread",
+    "amount": "1 loaf",
+    "tags": ["grain", "bakery"],
+    "category": "bakery"
+  },
+  {
+    "ingredientID": "7",
+    "name": "Salt",
+    "amount": "500g",
+    "tags": ["seasoning", "pantry"],
+    "category": "pantry"
+  },
+  {
+    "ingredientID": "8",
+    "name": "Chicken Breast",
+    "amount": "2 pieces",
+    "tags": ["meat", "protein"],
+    "category": "meat"
+  },
+  {
+    "ingredientID": "9",
+    "name": "Romaine Lettuce",
+    "amount": "1 head",
+    "tags": ["vegetable", "greens"],
+    "category": "produce"
+  },
+  {
+    "ingredientID": "10",
+    "name": "Parmesan Cheese",
+    "amount": "200g",
+    "tags": ["dairy", "cheese"],
+    "category": "dairy"
+  },
+  {
+    "ingredientID": "11",
+    "name": "Caesar Dressing",
+    "amount": "250ml",
+    "tags": ["condiment", "sauce"],
+    "category": "condiments"
+  },
+  {
+    "ingredientID": "12",
+    "name": "Flour",
+    "amount": "1kg",
+    "tags": ["baking", "pantry"],
+    "category": "pantry"
+  },
+  {
+    "ingredientID": "13",
+    "name": "Sugar",
+    "amount": "1kg",
+    "tags": ["baking", "sweet", "pantry"],
+    "category": "pantry"
+  },
+  {
+    "ingredientID": "14",
+    "name": "Eggs",
+    "amount": "12 large",
+    "tags": ["protein", "refrigerated"],
+    "category": "dairy"
+  },
+  {
+    "ingredientID": "15",
+    "name": "Chocolate Chips",
+    "amount": "200g",
+    "tags": ["baking", "sweet"],
+    "category": "baking"
+  },
+  {
+    "ingredientID": "16",
+    "name": "Broccoli",
+    "amount": "1 head",
+    "tags": ["vegetable", "greens"],
+    "category": "produce"
+  },
+  {
+    "ingredientID": "17",
+    "name": "Bell Pepper",
+    "amount": "1 medium",
+    "tags": ["vegetable"],
+    "category": "produce"
+  },
+  {
+    "ingredientID": "18",
+    "name": "Soy Sauce",
+    "amount": "500ml",
+    "tags": ["condiment", "asian"],
+    "category": "condiments"
+  },
+  {
+    "ingredientID": "19",
+    "name": "Carrots",
+    "amount": "500g",
+    "tags": ["vegetable", "root"],
+    "category": "produce"
+  },
+  {
+    "ingredientID": "20",
+    "name": "Pasta",
+    "amount": "500g",
+    "tags": ["grain", "pantry"],
+    "category": "pantry"
+  }
+]
