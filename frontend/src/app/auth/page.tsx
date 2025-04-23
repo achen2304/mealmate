@@ -14,14 +14,12 @@ export default function AuthPage() {
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const { user } = useAuth();
 
-  // If user is already logged in, redirect to home page
   useEffect(() => {
     if (user) {
       router.push('/');
     }
   }, [user, router]);
 
-  // Set mode based on URL query parameter
   useEffect(() => {
     const modeParam = searchParams.get('mode');
     if (modeParam === 'login' || modeParam === 'signup') {
@@ -37,7 +35,7 @@ export default function AuthPage() {
     <Container component="main" maxWidth="xs">
       <Box
         sx={{
-          minHeight: '100vh',
+          minHeight: '80vh',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',

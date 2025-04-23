@@ -4,6 +4,7 @@ import './globals.css';
 import { MuiProvider } from '@/lib/MuiTheme';
 import { AuthProvider } from '@/context/userAuth';
 import Navbar from '@/components/Navbar';
+import ProtectedRoute from '@/utils/ProtectedRoute';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -33,7 +34,7 @@ export default function RootLayout({
         <MuiProvider>
           <AuthProvider>
             <Navbar />
-            {children}
+            <ProtectedRoute>{children}</ProtectedRoute>
           </AuthProvider>
         </MuiProvider>
       </body>

@@ -4,22 +4,22 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ReactNode } from 'react';
 
-// Define your brand colors here
+// Main colors
 const primaryColor = {
-  main: '#2E7D32', // Forest green - perfect for a food/recipe app
+  main: '#2E7D32', 
   light: '#60ad5e',
   dark: '#005005',
   contrastText: '#ffffff',
 };
 
 const secondaryColor = {
-  main: '#FF8A65', // Coral - complementary to green and food-related
+  main: '#FF8A65', 
   light: '#FFB893',
   dark: '#C75B39',
   contrastText: '#000000',
 };
 
-// Create a theme instance
+// Theme instance
 const theme = createTheme({
   palette: {
     mode: 'light',
@@ -32,7 +32,6 @@ const theme = createTheme({
     text: {
       primary: '#171717',
     },
-    // You can add more color customizations here
     error: {
       main: '#d32f2f',
     },

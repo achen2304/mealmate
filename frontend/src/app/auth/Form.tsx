@@ -19,7 +19,6 @@ type FormProps = {
   onToggleMode?: () => void;
 };
 
-// Form data interface
 interface AuthFormData {
   email: string;
   password: string;
@@ -49,10 +48,8 @@ export default function AuthForm({ mode = 'login', onToggleMode }: FormProps) {
     },
   });
 
-  // Watch password value for confirm password validation
   const password = watch('password');
 
-  // Reset form and clear errors when mode changes
   useEffect(() => {
     clearError();
     clearErrors();
@@ -60,7 +57,6 @@ export default function AuthForm({ mode = 'login', onToggleMode }: FormProps) {
     setFormKey((prev) => prev + 1);
   }, [mode, clearError, clearErrors, reset]);
 
-  // Form submission handler
   const onSubmit: SubmitHandler<AuthFormData> = async (data) => {
     try {
       if (mode === 'login') {

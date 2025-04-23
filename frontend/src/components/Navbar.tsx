@@ -28,10 +28,7 @@ const NAV_LINKS = [
 ];
 
 // User menu items
-const USER_MENU_ITEMS = [
-  { label: 'Profile', path: '/profile' },
-  { label: 'Settings', path: '/settings' },
-];
+const USER_MENU_ITEMS = [{ label: 'Profile', path: '/profile' }];
 
 export default function Navbar() {
   const router = useRouter();
@@ -77,7 +74,10 @@ export default function Navbar() {
       <Container maxWidth="lg">
         <Toolbar
           disableGutters
-          sx={{ display: 'flex', justifyContent: 'space-between' }}
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
         >
           {/* Logo/Title - Left aligned */}
           <Typography
@@ -93,25 +93,27 @@ export default function Navbar() {
             MealMate
           </Typography>
 
-          {/* Desktop Navigation - Centered */}
-          <Box
-            sx={{
-              display: { xs: 'none', md: 'flex' },
-              gap: 3,
-              justifyContent: 'center',
-              flexGrow: 1,
-            }}
-          >
-            {NAV_LINKS.map((link) => (
-              <Button
-                key={link.path}
-                color="inherit"
-                onClick={() => navigateTo(link.path)}
-              >
-                {link.label}
-              </Button>
-            ))}
-          </Box>
+          {/* Desktop Navigation - Centered - Only shown when logged in */}
+          {user && (
+            <Box
+              sx={{
+                display: { xs: 'none', md: 'flex' },
+                gap: 3,
+                justifyContent: 'center',
+                flexGrow: 1,
+              }}
+            >
+              {NAV_LINKS.map((link) => (
+                <Button
+                  key={link.path}
+                  color="inherit"
+                  onClick={() => navigateTo(link.path)}
+                >
+                  {link.label}
+                </Button>
+              ))}
+            </Box>
+          )}
 
           {/* Desktop Authentication - Right aligned */}
           <Box
@@ -191,14 +193,17 @@ export default function Navbar() {
         onClose={() => setMobileMenuAnchor(null)}
         sx={{ mt: 1 }}
       >
-        {/* Navigation Links */}
-        {NAV_LINKS.map((link) => (
-          <MenuItem key={link.path} onClick={() => navigateTo(link.path)}>
-            {link.label}
-          </MenuItem>
-        ))}
-
-        <Divider />
+        {/* Navigation Links - Only shown when logged in */}
+        {user && (
+          <>
+            {NAV_LINKS.map((link) => (
+              <MenuItem key={link.path} onClick={() => navigateTo(link.path)}>
+                {link.label}
+              </MenuItem>
+            ))}
+            <Divider />
+          </>
+        )}
 
         {/* Authentication Items */}
         {isLoading ? (

@@ -40,13 +40,11 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Auth provider component
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Check for existing session on initial load
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
@@ -70,7 +68,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setError(null);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API delay
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       if (email === 'test@example.com' && password === 'Password123') {
         const mockUser = {
           id: '1',
@@ -98,7 +96,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setError(null);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API delay
+      await new Promise((resolve) => setTimeout(resolve, 1000)); 
 
       const mockUser = {
         id: Date.now().toString(),
@@ -117,7 +115,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  // Logout function
   const logout = async () => {
     setIsLoading(true);
     try {
