@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
@@ -18,135 +19,61 @@ type FormProps = {
   onToggleMode?: () => void;
 };
 
-const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{1,}$/;
-const PASSWORD_MIN_LENGTH = 8;
-
-// Field validation interfaces
-interface ValidationState {
-  email: string | null;
-  password: string | null;
-  confirmPassword: string | null;
-  name: string | null;
+// Form data interface
+interface AuthFormData {
+  email: string;
+  password: string;
+  confirmPassword?: string;
+  name?: string;
 }
 
 export default function AuthForm({ mode = 'login', onToggleMode }: FormProps) {
   const { login, signup, isLoading, error: authError, clearError } = useAuth();
-  const [formError, setFormError] = useState<string | null>(null);
+  const [formKey, setFormKey] = useState(0);
 
-  // Track field values for validation
-  const [formValues, setFormValues] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    name: '',
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+    reset,
+    setError,
+    clearErrors,
+  } = useForm<AuthFormData>({
+    mode: 'onChange',
+    defaultValues: {
+      email: '',
+      password: '',
+      confirmPassword: '',
+      name: '',
+    },
   });
 
-  // Track validation errors for each field
-  const [validationErrors, setValidationErrors] = useState<ValidationState>({
-    email: null,
-    password: null,
-    confirmPassword: null,
-    name: null,
-  });
+  // Watch password value for confirm password validation
+  const password = watch('password');
 
-  // Clear auth errors when toggling modes
+  // Reset form and clear errors when mode changes
   useEffect(() => {
     clearError();
-    setFormError(null);
-  }, [mode, clearError]);
+    clearErrors();
+    reset();
+    setFormKey((prev) => prev + 1);
+  }, [mode, clearError, clearErrors, reset]);
 
-  // Handle field changes and perform validation
-  const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-
-    // Update form values
-    setFormValues({
-      ...formValues,
-      [name]: value,
-    });
-
-    // Reset specific field error when user types
-    setValidationErrors({
-      ...validationErrors,
-      [name]: null,
-    });
-  };
-
-  // Validate individual fields
-  const validateField = (name: string, value: string): string | null => {
-    switch (name) {
-      case 'email':
-        if (!value.trim()) return 'Email is required';
-        if (!EMAIL_REGEX.test(value))
-          return 'Please enter a valid email address';
-        return null;
-
-      case 'password':
-        if (!value) return 'Password is required';
-        if (value.length < PASSWORD_MIN_LENGTH)
-          return `Password must be at least ${PASSWORD_MIN_LENGTH} characters`;
-        if (!/[A-Z]/.test(value))
-          return 'Password must contain at least one uppercase letter';
-        if (!/[a-z]/.test(value))
-          return 'Password must contain at least one lowercase letter';
-        if (!/[0-9]/.test(value))
-          return 'Password must contain at least one number';
-        return null;
-
-      case 'confirmPassword':
-        if (!value) return 'Please confirm your password';
-        if (value !== formValues.password) return 'Passwords do not match';
-        return null;
-
-      case 'name':
-        if (mode === 'signup' && !value.trim()) return 'Name is required';
-        return null;
-
-      default:
-        return null;
-    }
-  };
-
-  // Validate all fields before submission
-  const validateForm = (): boolean => {
-    const errors: ValidationState = {
-      email: validateField('email', formValues.email),
-      password: validateField('password', formValues.password),
-      confirmPassword:
-        mode === 'signup'
-          ? validateField('confirmPassword', formValues.confirmPassword)
-          : null,
-      name: mode === 'signup' ? validateField('name', formValues.name) : null,
-    };
-
-    setValidationErrors(errors);
-
-    // Form is valid if no errors exist
-    return !Object.values(errors).some((error) => error !== null);
-  };
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    // Validate all fields before submitting
-    if (!validateForm()) {
-      return; // Stop submission if validation fails
-    }
-
-    setFormError(null);
-
+  // Form submission handler
+  const onSubmit: SubmitHandler<AuthFormData> = async (data) => {
     try {
       if (mode === 'login') {
-        await login(formValues.email, formValues.password);
+        await login(data.email, data.password);
       } else {
-        await signup(formValues.email, formValues.password, formValues.name);
+        if (data.name) {
+          await signup(data.email, data.password, data.name);
+        }
       }
     } catch (err) {
-      // Auth errors will be handled by the context
-      // Any additional form-specific errors can be handled here
-      setFormError(
-        err instanceof Error ? err.message : 'An unknown error occurred'
-      );
+      setError('root', {
+        message: err instanceof Error ? err.message : 'Authentication failed',
+      });
     }
   };
 
@@ -159,14 +86,14 @@ export default function AuthForm({ mode = 'login', onToggleMode }: FormProps) {
         {mode === 'login' ? 'Log In' : 'Sign Up'}
       </Typography>
 
-      {(formError || authError) && (
+      {(errors.root?.message || authError) && (
         <Alert severity="error" sx={{ mb: 2 }}>
-          {formError || authError}
+          {errors.root?.message || authError}
         </Alert>
       )}
 
-      <Box component="form" onSubmit={handleSubmit} noValidate>
-        <Stack spacing={2}>
+      <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+        <Stack spacing={2} key={formKey}>
           {mode === 'signup' && (
             <TextField
               margin="normal"
@@ -174,13 +101,13 @@ export default function AuthForm({ mode = 'login', onToggleMode }: FormProps) {
               fullWidth
               id="name"
               label="Full Name"
-              name="name"
               autoComplete="name"
               autoFocus={mode === 'signup'}
-              value={formValues.name}
-              onChange={handleFieldChange}
-              error={!!validationErrors.name}
-              helperText={validationErrors.name}
+              error={!!errors.name}
+              helperText={errors.name?.message}
+              {...register('name', {
+                required: 'Name is required',
+              })}
             />
           )}
 
@@ -190,30 +117,49 @@ export default function AuthForm({ mode = 'login', onToggleMode }: FormProps) {
             fullWidth
             id="email"
             label="Email Address"
-            name="email"
             autoComplete="email"
             autoFocus={mode === 'login'}
-            value={formValues.email}
-            onChange={handleFieldChange}
-            error={!!validationErrors.email}
-            helperText={validationErrors.email}
+            error={!!errors.email}
+            helperText={errors.email?.message}
+            {...register('email', {
+              required: 'Email is required',
+              pattern: {
+                value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{1,}$/,
+                message: 'Please enter a valid email address',
+              },
+            })}
           />
 
           <TextField
             margin="normal"
             required
             fullWidth
-            name="password"
             label="Password"
             type="password"
             id="password"
             autoComplete={
               mode === 'login' ? 'current-password' : 'new-password'
             }
-            value={formValues.password}
-            onChange={handleFieldChange}
-            error={!!validationErrors.password}
-            helperText={validationErrors.password}
+            error={!!errors.password}
+            helperText={errors.password?.message}
+            {...register('password', {
+              required: 'Password is required',
+              minLength: {
+                value: 8,
+                message: 'Password must be at least 8 characters',
+              },
+              validate: {
+                hasUppercase: (value) =>
+                  /[A-Z]/.test(value) ||
+                  'Password must contain at least one uppercase letter',
+                hasLowercase: (value) =>
+                  /[a-z]/.test(value) ||
+                  'Password must contain at least one lowercase letter',
+                hasNumber: (value) =>
+                  /[0-9]/.test(value) ||
+                  'Password must contain at least one number',
+              },
+            })}
           />
 
           {mode === 'signup' && (
@@ -221,15 +167,17 @@ export default function AuthForm({ mode = 'login', onToggleMode }: FormProps) {
               margin="normal"
               required
               fullWidth
-              name="confirmPassword"
               label="Confirm Password"
               type="password"
               id="confirmPassword"
               autoComplete="new-password"
-              value={formValues.confirmPassword}
-              onChange={handleFieldChange}
-              error={!!validationErrors.confirmPassword}
-              helperText={validationErrors.confirmPassword}
+              error={!!errors.confirmPassword}
+              helperText={errors.confirmPassword?.message}
+              {...register('confirmPassword', {
+                required: 'Please confirm your password',
+                validate: (value) =>
+                  value === password || 'Passwords do not match',
+              })}
             />
           )}
 
@@ -267,14 +215,14 @@ export default function AuthForm({ mode = 'login', onToggleMode }: FormProps) {
         <Typography variant="body2">
           {mode === 'login' ? (
             <>
-              Don't have an account?{' '}
+              Don't have an account?
               <Button onClick={onToggleMode} variant="text" size="small">
                 Sign up
               </Button>
             </>
           ) : (
             <>
-              Already have an account?{' '}
+              Already have an account?
               <Button onClick={onToggleMode} variant="text" size="small">
                 Log in
               </Button>

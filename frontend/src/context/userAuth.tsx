@@ -10,14 +10,12 @@ import {
   ReactNode,
 } from 'react';
 
-// Define User type
 export interface User {
   id: string;
   email: string;
   name?: string;
 }
 
-// Define Auth context interface
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
@@ -28,7 +26,6 @@ interface AuthContextType {
   clearError: () => void;
 }
 
-// Create context with default values
 const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoading: false,
@@ -39,7 +36,6 @@ const AuthContext = createContext<AuthContextType>({
   clearError: () => {},
 });
 
-// Provider props interface
 interface AuthProviderProps {
   children: ReactNode;
 }
@@ -54,7 +50,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        // Check if user is already logged in (e.g., from localStorage or session)
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
           setUser(JSON.parse(storedUser));
@@ -76,7 +71,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API delay
-      // For demo purposes only - replace with actual API in production
       if (email === 'test@example.com' && password === 'Password123') {
         const mockUser = {
           id: '1',
@@ -98,7 +92,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  // Signup function
+  //signup function
   const signup = async (email: string, password: string, name: string) => {
     setIsLoading(true);
     setError(null);
@@ -106,7 +100,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API delay
 
-      // For demo - in production, integrate with your actual API
       const mockUser = {
         id: Date.now().toString(),
         email,
