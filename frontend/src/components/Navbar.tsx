@@ -23,7 +23,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 // Navigation links for both desktop and mobile menus
 const NAV_LINKS = [
   { label: 'Recipes', path: '/recipes' },
-  { label: 'Grocery Lists', path: '/grocery' },
+  { label: 'Grocery List', path: '/grocery' },
   { label: 'Store', path: '/store' },
 ];
 
