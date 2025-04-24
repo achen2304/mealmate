@@ -7,9 +7,13 @@ import { useState } from 'react';
 
 interface RecipeSearchProps {
   onSearch: (searchText: string) => void;
+  placeholder?: string;
 }
 
-export default function RecipeSearch({ onSearch }: RecipeSearchProps) {
+export default function SearchBar({
+  onSearch,
+  placeholder = 'Search...',
+}: RecipeSearchProps) {
   const [searchText, setSearchText] = useState('');
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,7 +30,7 @@ export default function RecipeSearch({ onSearch }: RecipeSearchProps) {
   return (
     <Box sx={{ width: '100%' }}>
       <TextField
-        placeholder="Search recipes..."
+        placeholder={placeholder}
         variant="outlined"
         fullWidth
         value={searchText}

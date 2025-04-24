@@ -15,35 +15,69 @@ import {
   OutlinedInput,
   SelectChangeEvent,
   IconButton,
+  List,
+  ListItem,
+  ListItemText,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import IngredientsModal from './IngredientsModal';
+import StepsModal from './StepsModal';
+import IngredientCard from '../card components/IngredientCard';
+import StepsCard from '../card components/StepsCard';
 
 const RECIPE_TAGS = [
   'breakfast',
   'lunch',
   'dinner',
-  'vegetarian',
-  'quick',
   'dessert',
-  'healthy',
-  'italian',
-  'protein',
+  'heavy',
+  'light',
+  'quick',
+  'vegetarian',
+  'vegan',
+  'gluten-free',
+  'dairy-free',
 ];
+
+interface Ingredient {
+  id: string;
+  name: string;
+  amount: string;
+  unit: string;
+}
+
+interface Step {
+  id: string;
+  instruction: string;
+}
 
 export default function AddRecipe() {
   const router = useRouter();
   const [recipeName, setRecipeName] = useState('');
   const [description, setDescription] = useState('');
-  const [cookTime, setCookTime] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  // New state for ingredients and steps
+  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+  const [steps, setSteps] = useState<Step[]>([]);
+  const [ingredientsModalOpen, setIngredientsModalOpen] = useState(false);
+  const [stepsModalOpen, setStepsModalOpen] = useState(false);
 
   const handleTagChange = (event: SelectChangeEvent<typeof selectedTags>) => {
     const {
       target: { value },
     } = event;
     setSelectedTags(typeof value === 'string' ? value.split(',') : value);
+  };
+
+  const handleIngredients = () => {
+    setIngredientsModalOpen(true);
+  };
+
+  const handleSteps = () => {
+    setStepsModalOpen(true);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -57,8 +91,9 @@ export default function AddRecipe() {
       recipeID: Date.now().toString(),
       name: recipeName,
       description,
-      cookTime: parseInt(cookTime),
       recipeTags: selectedTags,
+      ingredients: ingredients,
+      steps: steps,
     };
 
     console.log('New recipe:', newRecipe);
@@ -107,18 +142,6 @@ export default function AddRecipe() {
               onChange={(e) => setDescription(e.target.value)}
             />
 
-            <TextField
-              required
-              id="cookTime"
-              label="Cook Time (minutes)"
-              name="cookTime"
-              type="number"
-              inputProps={{ min: 1 }}
-              value={cookTime}
-              onChange={(e) => setCookTime(e.target.value)}
-              sx={{ maxWidth: '50%' }}
-            />
-
             <FormControl fullWidth>
               <InputLabel id="tags-label">Tags</InputLabel>
               <Select
@@ -144,6 +167,56 @@ export default function AddRecipe() {
               </Select>
             </FormControl>
 
+            <Box sx={{ mt: 2 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  mb: 2,
+                }}
+              >
+                <Typography variant="h6">Ingredients</Typography>
+                <Button variant="outlined" onClick={handleIngredients}>
+                  {ingredients.length > 0
+                    ? 'Edit Ingredients'
+                    : 'Add Ingredients'}
+                </Button>
+              </Box>
+
+              {ingredients.length > 0 ? (
+                <IngredientCard ingredients={ingredients} />
+              ) : (
+                <Typography color="text.secondary">
+                  No ingredients added yet
+                </Typography>
+              )}
+            </Box>
+
+            <Box sx={{ mt: 2 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  mb: 2,
+                }}
+              >
+                <Typography variant="h6">Steps</Typography>
+                <Button variant="outlined" onClick={handleSteps}>
+                  {steps.length > 0 ? 'Edit Steps' : 'Add Steps'}
+                </Button>
+              </Box>
+
+              {steps.length > 0 ? (
+                <StepsCard steps={steps} />
+              ) : (
+                <Typography color="text.secondary">
+                  No steps added yet
+                </Typography>
+              )}
+            </Box>
+
             <Box
               sx={{
                 display: 'flex',
@@ -156,7 +229,7 @@ export default function AddRecipe() {
               <Button
                 type="submit"
                 variant="contained"
-                disabled={!recipeName || !description || !cookTime}
+                disabled={!recipeName || !description}
               >
                 Save Recipe
               </Button>
@@ -164,6 +237,20 @@ export default function AddRecipe() {
           </Box>
         </Box>
       </Paper>
+
+      <IngredientsModal
+        open={ingredientsModalOpen}
+        onClose={() => setIngredientsModalOpen(false)}
+        ingredients={ingredients}
+        onSaveIngredients={setIngredients}
+      />
+
+      <StepsModal
+        open={stepsModalOpen}
+        onClose={() => setStepsModalOpen(false)}
+        steps={steps}
+        onSaveSteps={setSteps}
+      />
     </Container>
   );
 }

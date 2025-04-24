@@ -1,13 +1,13 @@
 'use client';
 
-import { Container, Typography, Box, Paper } from '@mui/material';
-import RecipeCard from './recipeCard';
-import RecipeSearch from '../../components/SearchBar';
+import { Container, Typography, Box } from '@mui/material';
+import RecipeCard from './card components/recipeCard';
+import SearchBar from '../../components/SearchBar';
 import defaultRecipes from '../../../testdata/recipes.json';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import FilterButton from './filterButton';
-import AddRecipeButton from './addRecipeButton';
+import FilterButton from './button components/filterButton';
+import AddRecipeButton from './button components/addRecipeButton';
 
 export default function Recipes() {
   const router = useRouter();
@@ -54,13 +54,6 @@ export default function Recipes() {
     setFilteredRecipes(results);
   };
 
-  const handleAddRecipe = (newRecipe: any) => {
-    const updatedRecipes = [...allRecipes, newRecipe];
-    setAllRecipes(updatedRecipes);
-
-    setTimeout(() => applyFilters(), 0);
-  };
-
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Typography variant="h4" component="h1" gutterBottom align="center">
@@ -79,7 +72,7 @@ export default function Recipes() {
         }}
       >
         <Box sx={{ flexGrow: 1, maxWidth: '600px' }}>
-          <RecipeSearch onSearch={handleSearch} />
+          <SearchBar onSearch={handleSearch} placeholder="Search recipes..." />
         </Box>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <FilterButton onFilterChange={handleFilterChange} />
@@ -100,7 +93,6 @@ export default function Recipes() {
               recipeID={recipe.recipeID}
               name={recipe.name}
               description={recipe.description}
-              cookTime={20}
               onClick={handleRecipeClick}
             />
           </Box>
