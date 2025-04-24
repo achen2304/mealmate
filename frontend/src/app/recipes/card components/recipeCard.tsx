@@ -4,14 +4,12 @@ import {
   CardActions,
   Typography,
   Button,
-  Box,
 } from '@mui/material';
 
 export interface RecipeCardProps {
   recipeID: string;
   name: string;
   description: string;
-  cookTime: number;
   onClick?: (recipeID: string) => void;
 }
 
@@ -19,7 +17,6 @@ export default function RecipeCard({
   recipeID,
   name,
   description,
-  cookTime,
   onClick,
 }: RecipeCardProps) {
   const handleClick = () => {
@@ -47,18 +44,6 @@ export default function RecipeCard({
         <Typography gutterBottom variant="h5" component="div">
           {name}
         </Typography>
-
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {cookTime && (
-            <Box
-              sx={{ display: 'flex', alignItems: 'center', marginBottom: 1 }}
-            >
-              <Typography variant="body2" color="text.secondary">
-                {cookTime} min
-              </Typography>
-            </Box>
-          )}
-        </Box>
         <Typography variant="body2" color="text.secondary">
           {description.length > 100
             ? `${description.substring(0, 100)}...`
@@ -66,7 +51,7 @@ export default function RecipeCard({
         </Typography>
       </CardContent>
 
-      <CardActions>
+      <CardActions sx={{ justifyContent: 'flex-end' }}>
         <Button size="small" onClick={handleClick}>
           View Recipe
         </Button>

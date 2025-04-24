@@ -6,7 +6,6 @@ import {
   Checkbox,
   ListItemText,
   Typography,
-  Chip,
   Box,
   Popper,
   Paper,
@@ -39,7 +38,6 @@ export default function FilterButton({ onFilterChange }: FilterButtonProps) {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const anchorRef = useRef<HTMLButtonElement>(null);
 
-  // Return focus to button when menu closes
   const prevOpen = useRef(open);
   useEffect(() => {
     if (prevOpen.current === true && open === false) {
