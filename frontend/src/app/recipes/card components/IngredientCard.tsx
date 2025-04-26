@@ -111,14 +111,10 @@ export default function IngredientCard({
         <Box
           sx={{
             display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+            justifyContent: 'flex-end',
             mb: 2,
           }}
         >
-          <Typography variant="h6" component="div" gutterBottom>
-            Ingredients
-          </Typography>
           {checkedIngredients.length > 0 && (
             <Button size="small" onClick={handleClearAll} color="primary">
               Clear All
@@ -145,6 +141,7 @@ export default function IngredientCard({
                     e.stopPropagation();
                     handleToggleIngredient(ingredient.id);
                   }}
+                  onClick={() => handleToggleIngredient(ingredient.id)}
                   size="small"
                 />
               </ListItemIcon>
