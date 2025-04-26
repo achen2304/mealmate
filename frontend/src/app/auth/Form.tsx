@@ -2,14 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Alert from '@mui/material/Alert';
-import Paper from '@mui/material/Paper';
-import Stack from '@mui/material/Stack';
-import CircularProgress from '@mui/material/CircularProgress';
+
+import {
+  TextField,
+  Button,
+  Box,
+  Typography,
+  Alert,
+  Paper,
+  Stack,
+  CircularProgress,
+} from '@mui/material';
 import { useAuth } from '@/context/userAuth';
 
 type AuthMode = 'login' | 'signup';
@@ -78,7 +81,7 @@ export default function AuthForm({ mode = 'login', onToggleMode }: FormProps) {
       elevation={3}
       sx={{ p: 4, width: '100%', maxWidth: 'md', mx: 'auto' }}
     >
-      <Typography variant="h5" component="h2" align="center" gutterBottom>
+      <Typography variant="h5" component="h1" align="center" gutterBottom>
         {mode === 'login' ? 'Log In' : 'Sign Up'}
       </Typography>
 
