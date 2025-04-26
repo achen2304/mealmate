@@ -103,14 +103,10 @@ export default function StepsCard({ steps, recipeId }: StepsCardProps) {
         <Box
           sx={{
             display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+            justifyContent: 'flex-end',
             mb: 2,
           }}
         >
-          <Typography variant="h6" component="div" gutterBottom>
-            Preparation Steps
-          </Typography>
           {checkedSteps.length > 0 && (
             <Button size="small" onClick={handleClearAll} color="primary">
               Clear All
@@ -137,6 +133,7 @@ export default function StepsCard({ steps, recipeId }: StepsCardProps) {
                     e.stopPropagation();
                     handleToggleStep(step.id);
                   }}
+                  onClick={() => handleToggleStep(step.id)}
                   size="small"
                 />
               </ListItemIcon>
