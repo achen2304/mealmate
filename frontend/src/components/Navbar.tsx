@@ -16,6 +16,7 @@ import { useAuth } from '@/context/userAuth';
 import { useState } from 'react';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import MobileNavbar from './MobileNavbar';
+import CartButton from './CartButton';
 
 const NAV_LINKS = [
   { label: 'Recipes', path: '/recipes' },
@@ -108,8 +109,12 @@ export default function Navbar() {
               flexBasis: '200px',
               display: 'flex',
               justifyContent: 'flex-end',
+              alignItems: 'center',
+              gap: 1,
             }}
           >
+            {/* Cart Button - Display for both logged in and logged out users */}
+
             {isLoading ? (
               <Box
                 sx={{
@@ -123,6 +128,7 @@ export default function Navbar() {
               <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
                 {user ? (
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <CartButton />
                     <Button
                       onClick={(e) => setUserMenuAnchor(e.currentTarget)}
                       color="inherit"
