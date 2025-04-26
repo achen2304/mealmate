@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { MuiProvider } from '@/lib/MuiTheme';
 import { AuthProvider } from '@/context/userAuth';
+import { CartProvider } from '@/context/cartContext';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/utils/ProtectedRoute';
 
@@ -33,8 +34,10 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <MuiProvider>
           <AuthProvider>
-            <Navbar />
-            <ProtectedRoute>{children}</ProtectedRoute>
+            <CartProvider>
+              <Navbar />
+              <ProtectedRoute>{children}</ProtectedRoute>
+            </CartProvider>
           </AuthProvider>
         </MuiProvider>
       </body>
