@@ -1,6 +1,6 @@
 'use client';
 
-import { Container, Typography, Box } from '@mui/material';
+import { Container, Typography, Box, Divider } from '@mui/material';
 import RecipeCard from './card components/recipeCard';
 import SearchBar from '../../components/SearchBar';
 import defaultRecipes from '../../../testdata/recipes.json';
@@ -8,9 +8,11 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import FilterButton from './button components/filterButton';
 import AddRecipeButton from './button components/addRecipeButton';
+import { useTheme } from '@mui/material/styles';
 
 export default function Recipes() {
   const router = useRouter();
+  const theme = useTheme();
   const [allRecipes, setAllRecipes] = useState(defaultRecipes);
   const [filteredRecipes, setFilteredRecipes] = useState(defaultRecipes);
   const [searchTerm, setSearchTerm] = useState('');
@@ -36,13 +38,19 @@ export default function Recipes() {
     let results = [...allRecipes];
 
     if (searchTerm) {
-      const lowercasedSearch = searchTerm.toLowerCase();
-      results = results.filter((recipe) =>
-        recipe.name
-          .toLowerCase()
-          .split(' ')
-          .some((word) => word.startsWith(lowercasedSearch))
-      );
+      const lowercasedSearch = searchTerm.toLowerCase().trim();
+      const searchWords = lowercasedSearch.split(/\s+/);
+
+      results = results.filter((recipe) => {
+        const recipeName = recipe.name.toLowerCase();
+        const recipeNameWords = recipeName.split(/\s+/);
+
+        return searchWords.every((searchWord) =>
+          recipeNameWords.some((recipeWord) =>
+            recipeWord.startsWith(searchWord)
+          )
+        );
+      });
     }
 
     if (selectedTags.length > 0) {
@@ -56,9 +64,19 @@ export default function Recipes() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom align="center">
+      <Typography
+        variant="h3"
+        component="h1"
+        gutterBottom
+        align="center"
+        sx={{
+          fontWeight: 'bold',
+          color: theme.palette.primary.main,
+        }}
+      >
         Your Recipes
       </Typography>
+      <Divider sx={{ my: 2 }} />
 
       {/* Search and Actions Bar */}
       <Box
@@ -93,6 +111,7 @@ export default function Recipes() {
               recipeID={recipe.recipeID}
               name={recipe.name}
               description={recipe.description}
+              recipeTags={recipe.recipeTags}
               onClick={handleRecipeClick}
             />
           </Box>
