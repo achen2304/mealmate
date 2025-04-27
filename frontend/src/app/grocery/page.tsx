@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Container, Typography, Box, Paper } from '@mui/material';
+import { Container, Typography, Box, useTheme } from '@mui/material';
 import RecipeSelector from './RecipeSelector';
 import GroceryList from './GroceryList';
 import defaultRecipes from '../../../testdata/recipes.json';
@@ -24,6 +24,7 @@ interface Recipe {
 }
 
 export default function Grocery() {
+  const theme = useTheme();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [selectedRecipes, setSelectedRecipes] = useState<string[]>([]);
   const [groceryList, setGroceryList] = useState<Ingredient[]>([]);
@@ -96,11 +97,14 @@ export default function Grocery() {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Typography
-        variant="h4"
+        variant="h3"
         component="h1"
         gutterBottom
         align="center"
-        sx={{ mb: 4 }}
+        sx={{
+          fontWeight: 'bold',
+          color: theme.palette.primary.main,
+        }}
       >
         Grocery Planner
       </Typography>

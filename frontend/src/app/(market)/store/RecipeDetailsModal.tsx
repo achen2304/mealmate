@@ -176,6 +176,7 @@ export default function RecipeDetailsModal({
                                   size="small"
                                   label={tag}
                                   sx={{ fontSize: '0.7rem' }}
+                                  component="span"
                                 />
                               ))}
                           {recipe.cookTime && (
