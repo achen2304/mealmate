@@ -35,8 +35,8 @@ export default function RootLayout({
         <MuiProvider>
           <AuthProvider>
             <CartProvider>
-              <Navbar />
-              <ProtectedRoute>{children}</ProtectedRoute>
+            <Navbar />
+            <ProtectedRoute>{children}</ProtectedRoute>
             </CartProvider>
           </AuthProvider>
         </MuiProvider>
