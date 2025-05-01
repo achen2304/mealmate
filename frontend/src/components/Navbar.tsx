@@ -114,7 +114,6 @@ export default function Navbar() {
             }}
           >
             {/* Cart Button - Display for both logged in and logged out users */}
-
             {isLoading ? (
               <Box
                 sx={{
