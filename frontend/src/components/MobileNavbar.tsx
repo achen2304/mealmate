@@ -51,15 +51,6 @@ export default function MobileNavbar({
     setOpen(false);
   };
 
-  function handleListKeyDown(event: React.KeyboardEvent) {
-    if (event.key === 'Tab') {
-      event.preventDefault();
-      setOpen(false);
-    } else if (event.key === 'Escape') {
-      setOpen(false);
-    }
-  }
-
   const prevOpen = React.useRef(open);
   React.useEffect(() => {
     if (prevOpen.current === true && open === false) {
@@ -133,7 +124,6 @@ export default function MobileNavbar({
                   autoFocusItem={open}
                   id="mobile-menu"
                   aria-labelledby="mobile-menu-button"
-                  onKeyDown={handleListKeyDown}
                   sx={{ py: 0.5 }}
                 >
                   {user && (

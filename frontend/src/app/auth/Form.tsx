@@ -70,9 +70,15 @@ export default function AuthForm({ mode = 'login', onToggleMode }: FormProps) {
         }
       }
     } catch (err) {
-      setError('root', {
-        message: err instanceof Error ? err.message : 'Authentication failed',
-      });
+      if (mode === 'login') {
+        setError('root', {
+          message: 'Username or password is incorrect',
+        });
+      } else {
+        setError('root', {
+          message: err instanceof Error ? err.message : 'Registration failed',
+        });
+      }
     }
   };
 
@@ -143,21 +149,23 @@ export default function AuthForm({ mode = 'login', onToggleMode }: FormProps) {
             helperText={errors.password?.message}
             {...register('password', {
               required: 'Password is required',
-              minLength: {
-                value: 8,
-                message: 'Password must be at least 8 characters',
-              },
-              validate: {
-                hasUppercase: (value) =>
-                  /[A-Z]/.test(value) ||
-                  'Password must contain at least one uppercase letter',
-                hasLowercase: (value) =>
-                  /[a-z]/.test(value) ||
-                  'Password must contain at least one lowercase letter',
-                hasNumber: (value) =>
-                  /[0-9]/.test(value) ||
-                  'Password must contain at least one number',
-              },
+              ...(mode === 'signup' && {
+                minLength: {
+                  value: 8,
+                  message: 'Password must be at least 8 characters',
+                },
+                validate: {
+                  hasUppercase: (value) =>
+                    /[A-Z]/.test(value) ||
+                    'Password must contain at least one uppercase letter',
+                  hasLowercase: (value) =>
+                    /[a-z]/.test(value) ||
+                    'Password must contain at least one lowercase letter',
+                  hasNumber: (value) =>
+                    /[0-9]/.test(value) ||
+                    'Password must contain at least one number',
+                },
+              }),
             })}
           />
 
