@@ -1,7 +1,5 @@
 'use client';
 
-//Test User: test@example.com, Password: Password123
-
 import {
   createContext,
   useContext,
@@ -9,9 +7,10 @@ import {
   useEffect,
   ReactNode,
 } from 'react';
+import userApi from '../lib/userapi';
 
 export interface User {
-  id: string;
+  _id: string;
   email: string;
   name?: string;
 }
@@ -24,6 +23,12 @@ interface AuthContextType {
   signup: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
+  updateUser: (data: {
+    name?: string;
+    email?: string;
+    password?: string;
+    currentPassword?: string;
+  }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -34,6 +39,7 @@ const AuthContext = createContext<AuthContextType>({
   signup: async () => {},
   logout: async () => {},
   clearError: () => {},
+  updateUser: async () => {},
 });
 
 interface AuthProviderProps {
@@ -62,27 +68,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     checkAuthStatus();
   }, []);
 
-  // Login function
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      if (email === 'test@example.com' && password === 'Password123') {
-        const mockUser = {
-          id: '1',
-          email,
-          name: 'Test User',
-        };
-        setUser(mockUser);
-        localStorage.setItem('user', JSON.stringify(mockUser));
-      } else {
-        throw new Error('Invalid email or password');
-      }
+      const userData = await userApi.login({ email, password });
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : 'An unknown error occurred'
+        err instanceof Error ? err.message : 'Invalid email or password'
       );
       throw err;
     } finally {
@@ -90,25 +86,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  //signup function
   const signup = async (email: string, password: string, name: string) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000)); 
-
-      const mockUser = {
-        id: Date.now().toString(),
-        email,
-        name,
-      };
-      setUser(mockUser);
-      localStorage.setItem('user', JSON.stringify(mockUser));
+      const userData = await userApi.register({ email, password, name });
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'An unknown error occurred'
-      );
+      setError(err instanceof Error ? err.message : 'Registration failed');
       throw err;
     } finally {
       setIsLoading(false);
@@ -119,7 +106,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setIsLoading(true);
     try {
       localStorage.removeItem('user');
-      localStorage.removeItem('token');
       setUser(null);
     } catch (err) {
       console.error('Logout error:', err);
@@ -128,9 +114,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  // Clear error function
   const clearError = () => {
     setError(null);
+  };
+
+  const updateUser = async (data: {
+    name?: string;
+    email?: string;
+    password?: string;
+    currentPassword?: string;
+  }) => {
+    if (!user?._id) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const updatedUser = await userApi.updateUser(user._id, data);
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update profile');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -143,6 +151,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         signup,
         logout,
         clearError,
+        updateUser,
       }}
     >
       {children}
