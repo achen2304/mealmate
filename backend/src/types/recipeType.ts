@@ -11,13 +11,11 @@ export interface Step {
 }
 
 export interface Recipe {
-  id: string;
   title: string;
   description: string;
   ingredients: Ingredient[];
   steps: Step[];
-  difficulty: 'easy' | 'medium' | 'hard';
-  Tags: string[];
+  tags: string[];
   imageUrl?: string;
   author: string;
   createdAt: Date;
