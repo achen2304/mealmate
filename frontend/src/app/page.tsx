@@ -7,19 +7,15 @@ import {
   Button,
   useTheme,
   Paper,
-  Card,
-  CardContent,
-  CardActionArea,
-  Chip,
 } from '@mui/material';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/userAuth';
 import defaultRecipes from '../../testdata/recipes.json';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
-import TimerIcon from '@mui/icons-material/Timer';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import Cart from '@mui/icons-material/ShoppingCart';
 import RecipeCard from './recipes/card components/recipeCard';
 
 export default function Home() {
@@ -182,19 +178,7 @@ export default function Home() {
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  style={{ marginRight: 8 }}
-                >
-                  <path
-                    d="M7 18C8.1 18 9 18.9 9 20S8.1 22 7 22 5 21.1 5 20 5.9 18 7 18M17 18C18.1 18 19 18.9 19 20S18.1 22 17 22 15 21.1 15 20 15.9 18 17 18M7.2 14.8V14.7L8.1 13H15.5C16.2 13 16.9 12.6 17.2 12L21.1 5L19.4 4L15.5 11H8.5L4.3 2H1V4H3L6.6 11.6L5.2 14C5.1 14.3 5 14.6 5 15C5 16.1 5.9 17 7 17H19V15H7.4C7.3 15 7.2 14.9 7.2 14.8Z"
-                    fill="#2E7D32"
-                  />
-                </svg>
+                <Cart sx={{ mr: 1, color: theme.palette.primary.main }} />
                 <Typography variant="h6">Grocery List</Typography>
               </Box>
               <Typography variant="body2" color="text.secondary" paragraph>
