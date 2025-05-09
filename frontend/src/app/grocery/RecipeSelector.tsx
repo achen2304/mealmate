@@ -10,7 +10,7 @@ import {
   Checkbox,
   Divider,
 } from '@mui/material';
-
+ 
 interface Recipe {
   recipeID: string;
   name: string;
