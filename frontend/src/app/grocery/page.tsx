@@ -14,7 +14,7 @@ interface Ingredient {
   unit: string;
   quantities?: Array<{ amount: string | number; unit: string }>;
 }
-
+ 
 interface Recipe {
   recipeID: string;
   name: string;

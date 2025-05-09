@@ -11,7 +11,7 @@ import {
   Checkbox,
   Divider,
 } from '@mui/material';
-
+ 
 interface Ingredient {
   id: string;
   name: string;
