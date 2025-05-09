@@ -1,6 +1,7 @@
 export interface User {
   email: string;
   password: string;
+  premium: { isPremium: boolean; endDate: Date };
   name: string;
   recipesId?: string[];
   cartId?: string[];

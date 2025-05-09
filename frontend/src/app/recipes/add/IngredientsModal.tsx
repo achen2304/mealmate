@@ -25,6 +25,7 @@ interface Ingredient {
   name: string;
   amount: string;
   unit: string;
+  type: string;
 }
 
 interface IngredientsModalProps {
@@ -35,6 +36,7 @@ interface IngredientsModalProps {
 }
 
 const UNITS = ['g', 'kg', 'ml', 'l', 'tsp', 'tbsp', 'cup', 'oz', 'lb', 'pinch'];
+const TYPES = ['produce', 'meat', 'dairy', 'pantry', 'spice', 'other'];
 
 export default function IngredientsModal({
   open,
@@ -47,6 +49,7 @@ export default function IngredientsModal({
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
   const [unit, setUnit] = useState('');
+  const [type, setType] = useState('');
 
   const handleAddIngredient = () => {
     if (name.trim() === '' || amount.trim() === '') return;
@@ -56,12 +59,14 @@ export default function IngredientsModal({
       name: name.trim(),
       amount: amount.trim(),
       unit: unit,
+      type: type || 'other',
     };
 
     setCurrentIngredients([...currentIngredients, ingredient]);
     setName('');
     setAmount('');
     setUnit('');
+    setType('');
   };
 
   const handleDeleteIngredient = (id: string) => {
@@ -84,7 +89,7 @@ export default function IngredientsModal({
             Add the ingredients needed for this recipe
           </Typography>
 
-          <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+          <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
             <TextField
               label="Ingredient name"
               value={name}
@@ -109,6 +114,21 @@ export default function IngredientsModal({
                 {UNITS.map((u) => (
                   <MenuItem key={u} value={u}>
                     {u}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl sx={{ flexGrow: 1 }}>
+              <InputLabel id="type-label">Type</InputLabel>
+              <Select
+                labelId="type-label"
+                value={type}
+                label="Type"
+                onChange={(e) => setType(e.target.value)}
+              >
+                {TYPES.map((t) => (
+                  <MenuItem key={t} value={t}>
+                    {t.charAt(0).toUpperCase() + t.slice(1)}
                   </MenuItem>
                 ))}
               </Select>

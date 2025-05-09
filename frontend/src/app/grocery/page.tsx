@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { Container, Typography, Box, useTheme } from '@mui/material';
 import RecipeSelector from './RecipeSelector';
 import GroceryList from './GroceryList';
-import defaultRecipes from '../../../testdata/recipes.json';
-import ingredientsData from '../../../testdata/ingredients.json';
+import { recipeApi } from '../../lib/recipeapi';
+import { useAuth } from '../../context/userAuth';
 
 interface Ingredient {
   id: string;
@@ -25,27 +25,33 @@ interface Recipe {
 
 export default function Grocery() {
   const theme = useTheme();
+  const { user } = useAuth();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [selectedRecipes, setSelectedRecipes] = useState<string[]>([]);
   const [groceryList, setGroceryList] = useState<Ingredient[]>([]);
 
   useEffect(() => {
-    const loadedRecipes = defaultRecipes.map((recipe) => {
-      const ingredients = recipe.ingredients.map((ing) => ({
-        id: ing.ingredientID,
-        name: getIngredientName(ing.ingredientID),
-        amount: ing.amount,
-        unit: ing.unit,
+    if (!user) {
+      setRecipes([]);
+      return;
+    }
+    recipeApi.getUserRecipes(user._id).then((backendRecipes) => {
+      // Map backend recipes to the expected structure
+      const mappedRecipes: Recipe[] = backendRecipes.map((r) => ({
+        recipeID: r._id,
+        name: r.title,
+        description: r.description,
+        recipeTags: r.tags,
+        ingredients: r.ingredients.map((ing, idx) => ({
+          id: `${ing.name}-${idx}`,
+          name: ing.name,
+          amount: ing.amount,
+          unit: ing.unit,
+        })),
       }));
-
-      return {
-        ...recipe,
-        ingredients,
-      };
+      setRecipes(mappedRecipes);
     });
-
-    setRecipes(loadedRecipes);
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     const ingredientsById: Record<string, Ingredient> = {};
@@ -87,11 +93,6 @@ export default function Grocery() {
         return [...prev, recipeId];
       }
     });
-  };
-
-  const getIngredientName = (id: string): string => {
-    const ingredient = ingredientsData.find((ing) => ing.ingredientID === id);
-    return ingredient ? ingredient.name : '';
   };
 
   return (
