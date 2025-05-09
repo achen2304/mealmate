@@ -24,30 +24,19 @@ import {
   ShoppingCart,
   CheckCircle,
 } from '@mui/icons-material';
-import defaultRecipes from '../../../../testdata/recipes.json';
 import { useCart } from '@/context/cartContext';
-
-interface Recipe {
-  recipeID: string;
-  name: string;
-  description: string;
-  recipeTags?: string[];
-  cookTime?: number;
-}
+import { StoreItem } from '@/lib/storeapi';
+import { recipeApi, Recipe as BackendRecipe } from '@/lib/recipeapi';
+import { useAuth } from '@/context/userAuth';
+import { storeApi } from '@/lib/storeapi';
 
 interface RecipeDetailsModalProps {
   open: boolean;
   onClose: () => void;
-  product: {
-    itemID: string;
-    itemName: string;
-    author: string;
-    itemType: string;
-    cost: number;
-    recipesId?: number[];
-    description?: string | string[];
-  } | null;
-  onAddToCart: (product: any) => void;
+  product: StoreItem;
+  onAddToCart: (product: StoreItem) => void;
+  isInCart: boolean;
+  onDelete?: () => void;
 }
 
 export default function RecipeDetailsModal({
@@ -55,26 +44,52 @@ export default function RecipeDetailsModal({
   onClose,
   product,
   onAddToCart,
+  isInCart,
+  onDelete,
 }: RecipeDetailsModalProps) {
   const theme = useTheme();
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const { user } = useAuth();
+  const [recipes, setRecipes] = useState<BackendRecipe[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const { isItemInCart } = useCart();
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    if (open && product) {
+    if (open && product && product.recipesId && product.recipesId.length > 0) {
       setLoading(true);
-
-      const includedRecipes = defaultRecipes.filter((recipe) =>
-        product.recipesId?.includes(parseInt(recipe.recipeID))
-      );
-
-      setRecipes(includedRecipes);
+      setError('');
+      const fetchRecipes = async () => {
+        try {
+          const fetched = await Promise.all(
+            product.recipesId!.map((id) => recipeApi.getRecipe(id))
+          );
+          setRecipes(fetched);
+        } catch (err) {
+          setError('Failed to load recipes.');
+          setRecipes([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchRecipes();
+    } else {
+      setRecipes([]);
       setLoading(false);
     }
   }, [open, product]);
 
-  if (!product) return null;
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await storeApi.deleteItem(product._id);
+      if (onDelete) onDelete();
+      onClose();
+    } catch (err) {
+      // Optionally show error
+      setDeleting(false);
+    }
+  };
 
   return (
     <Dialog
@@ -94,7 +109,7 @@ export default function RecipeDetailsModal({
           display: 'flex',
           justifyContent: 'end',
           alignItems: 'center',
-          backgroundColor: getProductColor(product.itemID),
+          backgroundColor: getProductColor(product._id),
           color: 'white',
           py: 0.5,
         }}
@@ -111,7 +126,7 @@ export default function RecipeDetailsModal({
       <DialogContent dividers>
         <Box sx={{ mb: 3 }}>
           <Typography variant="h5" component="div">
-            {product.itemName}
+            {product.name}
           </Typography>
 
           <Typography
@@ -148,10 +163,10 @@ export default function RecipeDetailsModal({
         ) : (
           <List sx={{ bgcolor: 'background.paper' }}>
             {recipes.map((recipe, index) => (
-              <React.Fragment key={recipe.recipeID}>
+              <React.Fragment key={recipe._id}>
                 <ListItem alignItems="flex-start">
                   <ListItemText
-                    primary={recipe.name}
+                    primary={recipe.title}
                     secondary={
                       <Box sx={{ mt: 0.5 }}>
                         <Box
@@ -163,14 +178,16 @@ export default function RecipeDetailsModal({
                             fontSize: '0.875rem',
                           }}
                         >
-                          {recipe.description.substring(0, 100)}
-                          {recipe.description.length > 100 ? '...' : ''}
+                          {recipe.description?.substring(0, 100)}
+                          {recipe.description && recipe.description.length > 100
+                            ? '...'
+                            : ''}
                         </Box>
                         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                          {recipe.recipeTags &&
-                            recipe.recipeTags
+                          {recipe.tags &&
+                            recipe.tags
                               .slice(0, 3)
-                              .map((tag) => (
+                              .map((tag: string) => (
                                 <Chip
                                   key={tag}
                                   size="small"
@@ -179,11 +196,11 @@ export default function RecipeDetailsModal({
                                   component="span"
                                 />
                               ))}
-                          {recipe.cookTime && (
+                          {(recipe as any).cookTime && (
                             <Chip
                               size="small"
                               icon={<AccessTime />}
-                              label={`${recipe.cookTime} min`}
+                              label={`${(recipe as any).cookTime} min`}
                               sx={{ fontSize: '0.7rem' }}
                             />
                           )}
@@ -199,21 +216,27 @@ export default function RecipeDetailsModal({
         )}
       </DialogContent>
       <DialogActions sx={{ px: 3, py: 2 }}>
+        {user?.name === product.author && (
+          <Button
+            onClick={handleDelete}
+            color="error"
+            disabled={deleting}
+            sx={{ mr: 1 }}
+          >
+            {deleting ? 'Deleting...' : 'Delete'}
+          </Button>
+        )}
         <Button onClick={onClose} color="primary">
           Close
         </Button>
-        {product && (
-          <Button
-            variant="contained"
-            color={isItemInCart(product.itemID) ? 'success' : 'primary'}
-            startIcon={
-              isItemInCart(product.itemID) ? <CheckCircle /> : <ShoppingCart />
-            }
-            onClick={() => onAddToCart(product)}
-          >
-            {isItemInCart(product.itemID) ? 'Remove' : 'Add to Cart'}
-          </Button>
-        )}
+        <Button
+          variant="contained"
+          color={isInCart ? 'success' : 'primary'}
+          startIcon={isInCart ? <CheckCircle /> : <ShoppingCart />}
+          onClick={() => onAddToCart(product)}
+        >
+          {isInCart ? 'Remove' : 'Add to Cart'}
+        </Button>
       </DialogActions>
     </Dialog>
   );
