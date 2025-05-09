@@ -120,7 +120,10 @@ function getRecipeColor(id: string) {
     '#26A69A', // Teal
     '#EC407A', // Pink
   ];
-
-  const colorIndex = parseInt(id.slice(-1), 10) % colors.length;
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const colorIndex = Math.abs(hash) % colors.length;
   return colors[colorIndex];
 }

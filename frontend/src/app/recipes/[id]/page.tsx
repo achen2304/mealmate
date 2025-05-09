@@ -14,27 +14,28 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useRouter, useParams } from 'next/navigation';
 import IngredientCard from '../card components/IngredientCard';
 import StepsCard from '../card components/StepsCard';
-import defaultRecipes from '../../../../testdata/recipes.json';
-import ingredientsData from '../../../../testdata/ingredients.json';
+import { recipeApi } from '../../../lib/recipeapi';
+
 interface Ingredient {
-  id: string;
   name: string;
-  amount: string;
+  amount: number;
   unit: string;
+  type: string;
 }
 
 interface Step {
-  id: string;
+  number: number;
   instruction: string;
 }
 
 interface Recipe {
-  recipeID: string;
-  name: string;
+  _id: string;
+  title: string;
   description: string;
-  recipeTags?: string[];
+  tags?: string[];
   ingredients: Ingredient[];
   steps: Step[];
+  author?: string;
 }
 
 export default function Recipe() {
@@ -42,47 +43,43 @@ export default function Recipe() {
   const params = useParams();
   const recipeId = params?.id as string;
   const [recipe, setRecipe] = useState<Recipe | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!recipeId) return;
 
-    const foundRecipe = defaultRecipes.find((r) => r.recipeID === recipeId);
+    setLoading(true);
+    setError(null);
 
-    if (foundRecipe) {
-      const formattedRecipe: Recipe = {
-        recipeID: foundRecipe.recipeID,
-        name: foundRecipe.name,
-        description: foundRecipe.description,
-        recipeTags: foundRecipe.recipeTags,
-        ingredients: foundRecipe.ingredients.map((ing) => ({
-          id: ing.ingredientID,
-          name: getIngredientName(ing.ingredientID),
-          amount: String(ing.amount),
-          unit: ing.unit,
-        })),
-        steps: foundRecipe.directions.map((dir) => ({
-          id: `step-${dir.step}`,
-          instruction: dir.direction,
-        })),
-      };
-
-      setRecipe(formattedRecipe);
-    }
+    recipeApi
+      .getRecipe(recipeId)
+      .then((data) => {
+        setRecipe(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError('Recipe not found');
+        setLoading(false);
+      });
   }, [recipeId]);
-
-  const getIngredientName = (id: string): string => {
-    const ingredient = ingredientsData.find((ing) => ing.ingredientID === id);
-    return ingredient ? ingredient.name : 'Unknown Ingredient';
-  };
 
   const handleBack = () => {
     router.back();
   };
 
-  if (!recipe) {
+  if (loading) {
     return (
       <Container maxWidth="md" sx={{ py: 4 }}>
         <Typography>Loading recipe...</Typography>
+      </Container>
+    );
+  }
+
+  if (error || !recipe) {
+    return (
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Typography color="error">{error || 'Recipe not found'}</Typography>
       </Container>
     );
   }
@@ -94,7 +91,7 @@ export default function Recipe() {
           <ArrowBackIcon />
         </IconButton>
         <Typography variant="h4" component="h1">
-          {recipe.name}
+          {recipe.title}
         </Typography>
       </Box>
 
@@ -103,9 +100,9 @@ export default function Recipe() {
           {recipe.description}
         </Typography>
 
-        {recipe.recipeTags && recipe.recipeTags.length > 0 && (
+        {recipe.tags && recipe.tags.length > 0 && (
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
-            {recipe.recipeTags.map((tag) => (
+            {recipe.tags.map((tag) => (
               <Chip
                 key={tag}
                 label={tag}
@@ -122,8 +119,11 @@ export default function Recipe() {
         Ingredients
       </Typography>
       <IngredientCard
-        ingredients={recipe.ingredients}
-        recipeId={recipe.recipeID}
+        ingredients={recipe.ingredients.map((ing, idx) => ({
+          ...ing,
+          id: `${ing.name}-${idx}`,
+        }))}
+        recipeId={recipe._id}
       />
 
       <Divider sx={{ my: 4 }} />
@@ -131,7 +131,13 @@ export default function Recipe() {
       <Typography variant="h5" component="h2" sx={{ mb: 2 }}>
         Preparation Steps
       </Typography>
-      <StepsCard steps={recipe.steps} recipeId={recipe.recipeID} />
+      <StepsCard
+        steps={recipe.steps.map((step, idx) => ({
+          ...step,
+          id: `step-${step.number ?? idx}`,
+        }))}
+        recipeId={recipe._id}
+      />
     </Container>
   );
 }

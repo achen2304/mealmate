@@ -15,9 +15,8 @@ import {
   OutlinedInput,
   SelectChangeEvent,
   IconButton,
-  List,
-  ListItem,
-  ListItemText,
+  Alert,
+  Snackbar,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useState } from 'react';
@@ -26,6 +25,8 @@ import IngredientsModal from './IngredientsModal';
 import StepsModal from './StepsModal';
 import IngredientCard from '../card components/IngredientCard';
 import StepsCard from '../card components/StepsCard';
+import { recipeApi } from '../../../lib/recipeapi';
+import { useAuth } from '../../../context/userAuth';
 
 const RECIPE_TAGS = [
   'breakfast',
@@ -46,6 +47,7 @@ interface Ingredient {
   name: string;
   amount: string;
   unit: string;
+  type: string;
 }
 
 interface Step {
@@ -55,15 +57,17 @@ interface Step {
 
 export default function AddRecipe() {
   const router = useRouter();
+  const { user } = useAuth();
   const [recipeName, setRecipeName] = useState('');
   const [description, setDescription] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-
-  // New state for ingredients and steps
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [steps, setSteps] = useState<Step[]>([]);
   const [ingredientsModalOpen, setIngredientsModalOpen] = useState(false);
   const [stepsModalOpen, setStepsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const handleTagChange = (event: SelectChangeEvent<typeof selectedTags>) => {
     const {
@@ -80,25 +84,63 @@ export default function AddRecipe() {
     setStepsModalOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!recipeName || !description) {
+    if (!user) {
+      setError('You must be logged in to create a recipe');
       return;
     }
 
-    const newRecipe = {
-      recipeID: Date.now().toString(),
-      name: recipeName,
-      description,
-      recipeTags: selectedTags,
-      ingredients: ingredients,
-      steps: steps,
-    };
+    if (
+      !recipeName ||
+      !description ||
+      ingredients.length === 0 ||
+      steps.length === 0
+    ) {
+      setError('Please fill in all required fields');
+      return;
+    }
 
-    console.log('New recipe:', newRecipe);
+    try {
+      setLoading(true);
+      setError(null);
 
-    router.push('/recipes');
+      // Convert ingredients to the correct format
+      const formattedIngredients = ingredients.map((ing) => ({
+        name: ing.name,
+        amount: parseFloat(ing.amount),
+        unit: ing.unit,
+        type: ing.type,
+      }));
+
+      // Convert steps to the correct format
+      const formattedSteps = steps.map((step, index) => ({
+        number: index + 1,
+        instruction: step.instruction,
+      }));
+
+      const recipeData = {
+        title: recipeName,
+        description,
+        ingredients: formattedIngredients,
+        steps: formattedSteps,
+        tags: selectedTags,
+        author: user._id,
+      };
+
+      await recipeApi.createRecipe(recipeData);
+      setSuccess(true);
+
+      // Redirect after a short delay to show success message
+      setTimeout(() => {
+        router.push('/recipes');
+      }, 1500);
+    } catch (err) {
+      setError('Failed to create recipe. Please try again.');
+      console.error('Error creating recipe:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {
@@ -128,6 +170,7 @@ export default function AddRecipe() {
               autoFocus
               value={recipeName}
               onChange={(e) => setRecipeName(e.target.value)}
+              disabled={loading}
             />
 
             <TextField
@@ -140,6 +183,7 @@ export default function AddRecipe() {
               name="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              disabled={loading}
             />
 
             <FormControl fullWidth>
@@ -158,6 +202,7 @@ export default function AddRecipe() {
                     ))}
                   </Box>
                 )}
+                disabled={loading}
               >
                 {RECIPE_TAGS.map((tag) => (
                   <MenuItem key={tag} value={tag}>
@@ -177,7 +222,11 @@ export default function AddRecipe() {
                 }}
               >
                 <Typography variant="h6">Ingredients</Typography>
-                <Button variant="outlined" onClick={handleIngredients}>
+                <Button
+                  variant="outlined"
+                  onClick={handleIngredients}
+                  disabled={loading}
+                >
                   {ingredients.length > 0
                     ? 'Edit Ingredients'
                     : 'Add Ingredients'}
@@ -203,7 +252,11 @@ export default function AddRecipe() {
                 }}
               >
                 <Typography variant="h6">Steps</Typography>
-                <Button variant="outlined" onClick={handleSteps}>
+                <Button
+                  variant="outlined"
+                  onClick={handleSteps}
+                  disabled={loading}
+                >
                   {steps.length > 0 ? 'Edit Steps' : 'Add Steps'}
                 </Button>
               </Box>
@@ -225,13 +278,21 @@ export default function AddRecipe() {
                 mt: 2,
               }}
             >
-              <Button onClick={handleCancel}>Cancel</Button>
+              <Button onClick={handleCancel} disabled={loading}>
+                Cancel
+              </Button>
               <Button
                 type="submit"
                 variant="contained"
-                disabled={!recipeName || !description}
+                disabled={
+                  loading ||
+                  !recipeName ||
+                  !description ||
+                  ingredients.length === 0 ||
+                  steps.length === 0
+                }
               >
-                Save Recipe
+                {loading ? 'Saving...' : 'Save Recipe'}
               </Button>
             </Box>
           </Box>
@@ -242,7 +303,9 @@ export default function AddRecipe() {
         open={ingredientsModalOpen}
         onClose={() => setIngredientsModalOpen(false)}
         ingredients={ingredients}
-        onSaveIngredients={setIngredients}
+        onSaveIngredients={(ingredients: Ingredient[]) =>
+          setIngredients(ingredients)
+        }
       />
 
       <StepsModal
@@ -251,6 +314,26 @@ export default function AddRecipe() {
         steps={steps}
         onSaveSteps={setSteps}
       />
+
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={() => setError(null)}
+      >
+        <Alert severity="error" onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={success}
+        autoHideDuration={1500}
+        onClose={() => setSuccess(false)}
+      >
+        <Alert severity="success" onClose={() => setSuccess(false)}>
+          Recipe created successfully!
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }

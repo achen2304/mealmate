@@ -3,20 +3,50 @@
 import { Container, Typography, Box, Divider } from '@mui/material';
 import RecipeCard from './card components/recipeCard';
 import SearchBar from '../../components/SearchBar';
-import defaultRecipes from '../../../testdata/recipes.json';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import FilterButton from './button components/filterButton';
 import AddRecipeButton from './button components/addRecipeButton';
 import { useTheme } from '@mui/material/styles';
+import { recipeApi, Recipe } from '../../lib/recipeapi';
+import { useAuth } from '../../context/userAuth';
 
 export default function Recipes() {
   const router = useRouter();
   const theme = useTheme();
-  const [allRecipes, setAllRecipes] = useState(defaultRecipes);
-  const [filteredRecipes, setFilteredRecipes] = useState(defaultRecipes);
+  const { user } = useAuth();
+  const [allRecipes, setAllRecipes] = useState<Recipe[]>([]);
+  const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchRecipes();
+  }, [user]);
+
+  const fetchRecipes = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      let recipes: Recipe[];
+
+      if (user) {
+        recipes = await recipeApi.getUserRecipes(user._id);
+      } else {
+        recipes = await recipeApi.getAllRecipes();
+      }
+
+      setAllRecipes(recipes);
+      setFilteredRecipes(recipes);
+    } catch (err) {
+      setError('Failed to fetch recipes');
+      console.error('Error fetching recipes:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     applyFilters();
@@ -42,7 +72,7 @@ export default function Recipes() {
       const searchWords = lowercasedSearch.split(/\s+/);
 
       results = results.filter((recipe) => {
-        const recipeName = recipe.name.toLowerCase();
+        const recipeName = recipe.title.toLowerCase();
         const recipeNameWords = recipeName.split(/\s+/);
 
         return searchWords.every((searchWord) =>
@@ -55,12 +85,28 @@ export default function Recipes() {
 
     if (selectedTags.length > 0) {
       results = results.filter((recipe) =>
-        selectedTags.some((tag) => recipe.recipeTags?.includes(tag))
+        selectedTags.some((tag) => recipe.tags.includes(tag))
       );
     }
 
     setFilteredRecipes(results);
   };
+
+  if (loading) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Typography>Loading recipes...</Typography>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Typography color="error">{error}</Typography>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -74,7 +120,7 @@ export default function Recipes() {
           color: theme.palette.primary.main,
         }}
       >
-        Your Recipes
+        {user ? 'Your Recipes' : 'All Recipes'}
       </Typography>
       <Divider sx={{ my: 2 }} />
 
@@ -94,7 +140,7 @@ export default function Recipes() {
         </Box>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <FilterButton onFilterChange={handleFilterChange} />
-          <AddRecipeButton />
+          {user && <AddRecipeButton />}
         </Box>
       </Box>
 
@@ -106,12 +152,12 @@ export default function Recipes() {
         }}
       >
         {filteredRecipes.map((recipe) => (
-          <Box key={recipe.recipeID}>
+          <Box key={recipe._id}>
             <RecipeCard
-              recipeID={recipe.recipeID}
-              name={recipe.name}
+              recipeID={recipe._id}
+              name={recipe.title}
               description={recipe.description}
-              recipeTags={recipe.recipeTags}
+              recipeTags={recipe.tags}
               onClick={handleRecipeClick}
             />
           </Box>
