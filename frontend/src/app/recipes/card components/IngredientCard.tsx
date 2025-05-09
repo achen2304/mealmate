@@ -15,7 +15,7 @@ import {
 interface Ingredient {
   id: string;
   name: string;
-  amount: string;
+  amount: string | number;
   unit: string;
 }
 
@@ -156,7 +156,8 @@ export default function IngredientCard({
                         : 'none',
                     }}
                   >
-                    {ingredient.amount} {ingredient.unit} {ingredient.name}
+                    {String(ingredient.amount)} {ingredient.unit}{' '}
+                    {ingredient.name}
                   </Typography>
                 }
               />

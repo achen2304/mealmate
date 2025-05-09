@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { UserModel } from '../models/user';
+import { RecipeModel } from '../models/recipe';
 import {
   UserRegister,
   UserLogin,
@@ -91,5 +92,84 @@ export const getUser = async (req: Request, res: Response): Promise<void> => {
     res.json(user);
   } catch (error) {
     res.status(400).json({ error: 'Error fetching user' });
+  }
+};
+
+export const getUserRecipes = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const user = await UserModel.findById(id);
+
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    const recipes = await RecipeModel.find({
+      _id: { $in: user.recipesId },
+    });
+
+    res.json(recipes);
+  } catch (error) {
+    res.status(400).json({ error: 'Error fetching user recipes' });
+  }
+};
+
+export const addRecipeToUser = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { recipeId } = req.body;
+
+    const recipe = await RecipeModel.findById(recipeId);
+    if (!recipe) {
+      res.status(404).json({ error: 'Recipe not found' });
+      return;
+    }
+
+    const user = await UserModel.findByIdAndUpdate(
+      id,
+      { $addToSet: { recipesId: recipeId } },
+      { new: true }
+    );
+
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    res.json({ message: 'Recipe added to user successfully', user });
+  } catch (error) {
+    res.status(400).json({ error: 'Error adding recipe to user' });
+  }
+};
+
+export const removeRecipeFromUser = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { recipeId } = req.body;
+
+    const user = await UserModel.findByIdAndUpdate(
+      id,
+      { $pull: { recipesId: recipeId } },
+      { new: true }
+    );
+
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    res.json({ message: 'Recipe removed from user successfully', user });
+  } catch (error) {
+    res.status(400).json({ error: 'Error removing recipe from user' });
   }
 };
