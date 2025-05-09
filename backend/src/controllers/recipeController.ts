@@ -3,6 +3,8 @@ import { RecipeModel } from '../models/recipe';
 import { RecipeCreate, RecipeUpdate, RecipeDelete } from '../types/recipeType';
 import { UserModel } from '../models/user';
 
+//for merge request
+
 export const createRecipe = async (
   req: Request,
   res: Response
