@@ -17,11 +17,39 @@ import BookmarkIcon from '@mui/icons-material/Bookmark';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Cart from '@mui/icons-material/ShoppingCart';
 import RecipeCard from './recipes/card components/recipeCard';
+import { useEffect, useState } from 'react';
+import { recipeApi, Recipe as BackendRecipe } from '../lib/recipeapi';
 
 export default function Home() {
   const theme = useTheme();
   const router = useRouter();
   const { user } = useAuth();
+  const [recentRecipes, setRecentRecipes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      setLoading(true);
+      recipeApi
+        .getUserRecipes(user._id)
+        .then((recipes) => {
+          // Sort by updatedAt or createdAt descending
+          const sorted = [...recipes].sort(
+            (a, b) =>
+              new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+          );
+          setRecentRecipes(sorted.slice(0, 3));
+          setLoading(false);
+        })
+        .catch(() => {
+          setRecentRecipes([]);
+          setLoading(false);
+        });
+    } else {
+      setRecentRecipes(defaultRecipes.slice(0, 3));
+      setLoading(false);
+    }
+  }, [user]);
 
   const handleAuthNavigation = (mode: 'login' | 'signup') => {
     router.push(`/auth?mode=${mode}`);
@@ -34,8 +62,6 @@ export default function Home() {
   const handleViewAllRecipes = () => {
     router.push('/recipes');
   };
-
-  const recentRecipes = defaultRecipes.slice(0, 3);
 
   if (user) {
     return (
@@ -217,28 +243,32 @@ export default function Home() {
             </Button>
           </Box>
 
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-            {recentRecipes.map((recipe) => (
-              <Box
-                key={recipe.recipeID}
-                sx={{
-                  flexBasis: {
-                    xs: '100%',
-                    sm: 'calc(50% - 12px)',
-                    md: 'calc(33.333% - 16px)',
-                  },
-                }}
-              >
-                <RecipeCard
-                  recipeID={recipe.recipeID}
-                  name={recipe.name}
-                  description={recipe.description}
-                  recipeTags={recipe.recipeTags}
-                  onClick={handleRecipeNavigation}
-                />
-              </Box>
-            ))}
-          </Box>
+          {loading ? (
+            <Typography>Loading recipes...</Typography>
+          ) : (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+              {recentRecipes.map((recipe) => (
+                <Box
+                  key={recipe._id || recipe.recipeID}
+                  sx={{
+                    flexBasis: {
+                      xs: '100%',
+                      sm: 'calc(50% - 12px)',
+                      md: 'calc(33.333% - 16px)',
+                    },
+                  }}
+                >
+                  <RecipeCard
+                    recipeID={recipe._id || recipe.recipeID}
+                    name={recipe.title || recipe.name}
+                    description={recipe.description}
+                    recipeTags={recipe.tags || recipe.recipeTags}
+                    onClick={handleRecipeNavigation}
+                  />
+                </Box>
+              ))}
+            </Box>
+          )}
         </Box>
       </Container>
     );
