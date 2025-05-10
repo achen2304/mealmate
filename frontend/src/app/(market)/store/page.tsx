@@ -25,8 +25,6 @@ import RecipeBookCard from './RecipeBookCard';
 import RecipeDetailsModal from './RecipeDetailsModal';
 import SearchBar from '@/components/SearchBar';
 
-import storeProducts from '../../../../testdata/storeProducts.json';
-
 interface Product {
   itemID: string;
   itemName: string;
@@ -51,10 +49,6 @@ export default function StorePage() {
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredRecipeBooks, setFilteredRecipeBooks] = useState<Product[]>([]);
-
-  useEffect(() => {
-    setProducts(storeProducts as Product[]);
-  }, []);
 
   useEffect(() => {
     const recipeBooks = products.filter(

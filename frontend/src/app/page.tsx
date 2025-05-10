@@ -11,7 +11,6 @@ import {
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/userAuth';
-import defaultRecipes from '../../testdata/recipes.json';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -46,7 +45,6 @@ export default function Home() {
           setLoading(false);
         });
     } else {
-      setRecentRecipes(defaultRecipes.slice(0, 3));
       setLoading(false);
     }
   }, [user]);

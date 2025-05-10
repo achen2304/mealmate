@@ -6,7 +6,6 @@ import { AuthProvider } from '@/context/userAuth';
 import { CartProvider } from '@/context/cartContext';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/utils/ProtectedRoute';
-
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
@@ -35,8 +34,8 @@ export default function RootLayout({
         <MuiProvider>
           <AuthProvider>
             <CartProvider>
-            <Navbar />
-            <ProtectedRoute>{children}</ProtectedRoute>
+              <Navbar />
+              <ProtectedRoute>{children}</ProtectedRoute>
             </CartProvider>
           </AuthProvider>
         </MuiProvider>
