@@ -8,41 +8,24 @@ import {
   Button,
   Box,
   useTheme,
-  Chip,
 } from '@mui/material';
-import {
-  AutoStories,
-  ShoppingCart,
-  Info,
-  CheckCircle,
-} from '@mui/icons-material';
-import { useCart } from '@/context/cartContext';
+import { ShoppingCart, CheckCircle } from '@mui/icons-material';
+import { StoreItem } from '@/lib/storeapi';
 
 interface RecipeBookCardProps {
-  product: {
-    itemID: string;
-    itemName: string;
-    author: string;
-    itemType: string;
-    cost: number;
-    recipesId?: number[];
-    description?: string | string[];
-  };
-  onShowDetails: (product: any) => void;
-  onAddToCart: (product: any) => void;
+  book: StoreItem;
+  onAddToCart: (book: StoreItem) => void;
+  onShowDetails: (book: StoreItem) => void;
+  isInCart: boolean;
 }
 
 export default function RecipeBookCard({
-  product,
-  onShowDetails,
+  book,
   onAddToCart,
+  onShowDetails,
+  isInCart,
 }: RecipeBookCardProps) {
   const theme = useTheme();
-  const { isItemInCart } = useCart();
-
-  const handleShowDetails = () => {
-    onShowDetails(product);
-  };
 
   return (
     <Card
@@ -57,84 +40,42 @@ export default function RecipeBookCard({
         },
       }}
     >
-      <Box
-        sx={{
-          height: 140,
-          backgroundColor: getProductColor(product.itemID),
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <AutoStories sx={{ fontSize: 60, color: 'white' }} />
-      </Box>
       <CardContent sx={{ flexGrow: 1 }}>
-        <Typography variant="h6" component="div" sx={{ mb: 0 }}>
-          {product.itemName}
+        <Typography variant="h6" component="div" gutterBottom>
+          {book.name}
         </Typography>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            by {product.author}
-          </Typography>
-          <Chip
-            size="small"
-            label={`${product.recipesId?.length} recipes`}
-            color="secondary"
-            variant="outlined"
-          />
-        </Box>
-        <Typography variant="body1" sx={{ mb: 1 }}>
-          {Array.isArray(product.description)
-            ? product.description.join(', ')
-            : product.description}
+        <Typography variant="body2" color="text.secondary" gutterBottom>
+          by {book.author}
         </Typography>
-        <Typography variant="h6" color="primary" sx={{ mb: 1 }}>
-          ${product.cost.toFixed(2)}
+        <Typography variant="h5" color="primary" sx={{ my: 2 }}>
+          ${book.cost.toFixed(2)}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {book.description[0]}
         </Typography>
       </CardContent>
-      <CardActions
-        sx={{
-          p: 2,
-          pt: 0,
-          display: 'flex',
-          gap: 1,
-          justifyContent: 'space-between',
-        }}
-      >
-        <Button
-          size="small"
-          startIcon={<Info />}
-          onClick={handleShowDetails}
-          sx={{ width: '40%' }}
-        >
-          Details
-        </Button>
-        <Button
-          variant="contained"
-          size="small"
-          sx={{ borderRadius: 2, width: '60%' }}
-          startIcon={
-            isItemInCart(product.itemID) ? <CheckCircle /> : <ShoppingCart />
-          }
-          onClick={() => onAddToCart(product)}
-          color={isItemInCart(product.itemID) ? 'success' : 'primary'}
-        >
-          {isItemInCart(product.itemID) ? 'Remove' : 'Add to Cart'}
-        </Button>
+      <CardActions sx={{ p: 2, pt: 0 }}>
+        <Box sx={{ display: 'flex', gap: 1, width: '100%' }}>
+          <Button
+            variant="outlined"
+            fullWidth
+            onClick={() => onShowDetails(book)}
+            sx={{ borderRadius: 2 }}
+          >
+            View Details
+          </Button>
+          <Button
+            variant="contained"
+            fullWidth
+            startIcon={isInCart ? <CheckCircle /> : <ShoppingCart />}
+            onClick={() => onAddToCart(book)}
+            color={isInCart ? 'success' : 'primary'}
+            sx={{ borderRadius: 2 }}
+          >
+            {isInCart ? 'Remove' : 'Add to Cart'}
+          </Button>
+        </Box>
       </CardActions>
     </Card>
   );
-}
-
-function getProductColor(id: string) {
-  const colors = [
-    '#4CAF50', // Green
-    '#F57C00', // Orange
-    '#5C6BC0', // Indigo
-    '#26A69A', // Teal
-    '#EC407A', // Pink
-  ];
-
-  const colorIndex = parseInt(id.slice(-1), 10) % colors.length;
-  return colors[colorIndex];
 }
