@@ -9,6 +9,8 @@ import {
 } from 'react';
 import userApi from '../lib/userapi';
 
+// Context for user authentication so the user can stay logged in across the app
+
 export interface User {
   _id: string;
   email: string;
@@ -28,6 +30,8 @@ interface AuthContextType {
     email?: string;
     password?: string;
     currentPassword?: string;
+    recipesId?: string[];
+    cartId?: string[];
   }) => Promise<void>;
 }
 
@@ -123,6 +127,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     email?: string;
     password?: string;
     currentPassword?: string;
+    recipesId?: string[];
+    cartId?: string[];
   }) => {
     if (!user?._id) return;
 

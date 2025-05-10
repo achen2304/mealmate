@@ -23,6 +23,8 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { useCart } from '@/context/cartContext';
 import { useRouter } from 'next/navigation';
 
+// Cart button for the app
+
 export default function CartButton() {
   const router = useRouter();
   const theme = useTheme();
@@ -38,27 +40,33 @@ export default function CartButton() {
     clearCart,
   } = useCart();
 
+  // Handle the open for the cart button
   const handleOpen = () => {
     setOpen(true);
   };
 
+  // Handle the close for the cart button
   const handleClose = () => {
     setOpen(false);
   };
 
+  // Handle the remove item for the cart button
   const handleRemoveItem = (itemID: string) => {
     removeFromCart(itemID);
   };
 
+  // Handle the checkout for the cart button
   const handleCheckout = () => {
     setOpen(false);
     router.push('/checkout');
   };
 
+  // Format the currency for the cart button
   const formatCurrency = (amount: number) => {
     return amount.toFixed(2);
   };
 
+  // Render the cart button
   return (
     <>
       <IconButton

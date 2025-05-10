@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api';
+// API calls for user authentication
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
 const userApi = {
   register: async (userData: {
@@ -36,7 +38,13 @@ const userApi = {
 
   updateUser: async (
     userId: string,
-    userData: { email?: string; password?: string; name?: string }
+    userData: {
+      email?: string;
+      password?: string;
+      name?: string;
+      recipesId?: string[];
+      cartId?: string[];
+    }
   ) => {
     try {
       const response = await axios.put(`${API_URL}/users/${userId}`, userData);

@@ -4,16 +4,18 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ReactNode } from 'react';
 
+// MUI theme for the app
+
 // Main colors
 const primaryColor = {
-  main: '#2E7D32', 
+  main: '#2E7D32',
   light: '#60ad5e',
   dark: '#005005',
   contrastText: '#ffffff',
 };
 
 const secondaryColor = {
-  main: '#FF8A65', 
+  main: '#FF8A65',
   light: '#FFB893',
   dark: '#C75B39',
   contrastText: '#000000',

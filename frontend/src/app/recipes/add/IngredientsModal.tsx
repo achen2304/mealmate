@@ -35,7 +35,6 @@ interface IngredientsModalProps {
   onSaveIngredients: (ingredients: Ingredient[]) => void;
 }
 
-const UNITS = ['g', 'kg', 'ml', 'l', 'tsp', 'tbsp', 'cup', 'oz', 'lb', 'pinch'];
 const TYPES = ['produce', 'meat', 'dairy', 'pantry', 'spice', 'other'];
 
 export default function IngredientsModal({
@@ -91,33 +90,18 @@ export default function IngredientsModal({
 
           <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
             <TextField
-              label="Ingredient name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              sx={{ flexGrow: 2 }}
-            />
-            <TextField
               label="Amount"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               sx={{ flexGrow: 1 }}
               placeholder="e.g. 1, 1/2, 1/4"
             />
-            <FormControl sx={{ flexGrow: 1 }}>
-              <InputLabel id="unit-label">Unit</InputLabel>
-              <Select
-                labelId="unit-label"
-                value={unit}
-                label="Unit"
-                onChange={(e) => setUnit(e.target.value)}
-              >
-                {UNITS.map((u) => (
-                  <MenuItem key={u} value={u}>
-                    {u}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <TextField
+              label="Ingredient name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              sx={{ flexGrow: 2 }}
+            />
             <FormControl sx={{ flexGrow: 1 }}>
               <InputLabel id="type-label">Type</InputLabel>
               <Select

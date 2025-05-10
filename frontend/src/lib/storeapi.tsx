@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+// API calls for store/market
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
 export interface StoreItem {

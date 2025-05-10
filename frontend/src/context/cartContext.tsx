@@ -2,11 +2,13 @@
 
 import React, { createContext, useContext, useState } from 'react';
 
+// Context for cart so it can be used across the app
 export interface CartItem {
   itemID: string;
   itemName: string;
   itemType: string;
   cost: number;
+  recipesId?: string[];
 }
 
 interface CartContextType {

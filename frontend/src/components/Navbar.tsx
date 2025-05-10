@@ -18,32 +18,41 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import MobileNavbar from './MobileNavbar';
 import CartButton from './CartButton';
 
+// Navbar for the app
+
+// Navbar links for the app
 const NAV_LINKS = [
   { label: 'Recipes', path: '/recipes' },
   { label: 'Grocery List', path: '/grocery' },
   { label: 'Store', path: '/store' },
 ];
 
+// User menu items for the app
 const USER_MENU_ITEMS = [{ label: 'Profile', path: '/profile' }];
 
+// Navbar component
 export default function Navbar() {
   const router = useRouter();
   const { user, logout, isLoading } = useAuth();
 
+  // User menu anchor for the app
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(
     null
   );
 
+  // Routing for the NAV_LINKS
   const navigateTo = (path: string) => {
     router.push(path);
     closeAllMenus();
   };
 
+  // Handle the auth navigation for the app
   const handleAuthNavigation = (mode: 'login' | 'signup') => {
     router.push(`/auth?mode=${mode}`);
     closeAllMenus();
   };
 
+  // Handle the logout for the app
   const handleLogout = async () => {
     try {
       await logout();
@@ -53,10 +62,12 @@ export default function Navbar() {
     }
   };
 
+  // Close all menus for the app
   const closeAllMenus = () => {
     setUserMenuAnchor(null);
   };
 
+  // Render the navbar for the app
   return (
     <AppBar position="static" color="transparent" elevation={1}>
       <Container maxWidth="lg">
@@ -67,7 +78,7 @@ export default function Navbar() {
             justifyContent: 'space-between',
           }}
         >
-          {/* Logo/Title - Left aligned */}
+          {/* Logo/Title */}
           <Typography
             variant="h6"
             component="div"
@@ -81,7 +92,7 @@ export default function Navbar() {
             MealMate
           </Typography>
 
-          {/* Desktop Navigation - Centered - Only shown when logged in */}
+          {/* Desktop Navigation - Only shown when logged in */}
           {user && (
             <Box
               sx={{
@@ -103,7 +114,7 @@ export default function Navbar() {
             </Box>
           )}
 
-          {/* Desktop Authentication - Right aligned */}
+          {/* Desktop Authentication  */}
           <Box
             sx={{
               flexBasis: '200px',
@@ -113,7 +124,7 @@ export default function Navbar() {
               gap: 1,
             }}
           >
-            {/* Cart Button - Display for both logged in and logged out users */}
+            {/* Cart Button */}
             {isLoading ? (
               <Box
                 sx={{

@@ -6,6 +6,9 @@ import { AuthProvider } from '@/context/userAuth';
 import { CartProvider } from '@/context/cartContext';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/utils/ProtectedRoute';
+
+// Page layout for the app - includes the navbar, protected routes, and the providers/contexts for the app
+
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],

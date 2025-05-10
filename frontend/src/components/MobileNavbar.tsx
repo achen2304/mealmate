@@ -10,9 +10,13 @@ import {
   MenuList,
   ClickAwayListener,
   Grow,
+  Box,
 } from '@mui/material';
 import * as React from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
+import CartButton from './CartButton';
+
+// Mobile navbar for the app
 
 interface MobileNavbarProps {
   user: any;
@@ -24,6 +28,7 @@ interface MobileNavbarProps {
   onAuthNavigation: (mode: 'login' | 'signup') => void;
 }
 
+// Mobile navbar component
 export default function MobileNavbar({
   user,
   isLoading,
@@ -36,10 +41,12 @@ export default function MobileNavbar({
   const [open, setOpen] = React.useState(false);
   const anchorRef = React.useRef<HTMLButtonElement>(null);
 
+  // Handle the toggle for the mobile navbar
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
   };
 
+  // Handle the close for the mobile navbar
   const handleClose = (event: Event | React.SyntheticEvent) => {
     if (
       anchorRef.current &&
@@ -51,6 +58,7 @@ export default function MobileNavbar({
     setOpen(false);
   };
 
+  // Handle the focus for the mobile navbar
   const prevOpen = React.useRef(open);
   React.useEffect(() => {
     if (prevOpen.current === true && open === false) {
@@ -60,21 +68,25 @@ export default function MobileNavbar({
     prevOpen.current = open;
   }, [open]);
 
+  // Handle the navigation for the mobile navbar
   const handleNavigation = (path: string) => {
     onNavigate(path);
     setOpen(false);
   };
 
+  // Handle the auth navigation for the mobile navbar
   const handleAuth = (mode: 'login' | 'signup') => {
     onAuthNavigation(mode);
     setOpen(false);
   };
 
+  // Handle the logout for the mobile navbar
   const handleLogout = () => {
     onLogout();
     setOpen(false);
   };
 
+  // Render the mobile navbar
   return (
     <>
       <IconButton
@@ -128,6 +140,9 @@ export default function MobileNavbar({
                 >
                   {user && (
                     <>
+                      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                        <CartButton />
+                      </Box>
                       {navLinks.map((link) => (
                         <MenuItem
                           key={link.path}

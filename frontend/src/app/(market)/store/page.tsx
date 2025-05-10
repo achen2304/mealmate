@@ -19,40 +19,49 @@ import {
   Subscriptions,
   ShoppingCart,
   CheckCircle,
+  Add,
 } from '@mui/icons-material';
 import { useCart } from '@/context/cartContext';
 import RecipeBookCard from './RecipeBookCard';
 import RecipeDetailsModal from './RecipeDetailsModal';
 import SearchBar from '@/components/SearchBar';
-
-interface Product {
-  itemID: string;
-  itemName: string;
-  itemType: string;
-  cost: number;
-  planType: string | null;
-  description?: string[];
-  author?: string;
-  recipesId?: number[];
-}
+import { storeApi, StoreItem } from '@/lib/storeapi';
+import CreateRecipeBookModal from './CreateRecipeBookModal';
 
 export default function StorePage() {
   const theme = useTheme();
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<StoreItem[]>([]);
   const { addToCart, isItemInCart, removeFromCart } = useCart();
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState<
     'success' | 'info' | 'warning' | 'error'
   >('success');
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<StoreItem | null>(
+    null
+  );
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredRecipeBooks, setFilteredRecipeBooks] = useState<Product[]>([]);
+  const [filteredRecipeBooks, setFilteredRecipeBooks] = useState<StoreItem[]>(
+    []
+  );
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const items = await storeApi.getAllItems();
+        setProducts(items);
+      } catch (error) {
+        console.error('Error fetching store items:', error);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   useEffect(() => {
     const recipeBooks = products.filter(
-      (product) => product.itemType === 'Recipe Book'
+      (product) => product.type === 'Recipe Book'
     );
 
     if (searchTerm.trim() === '') {
@@ -62,8 +71,8 @@ export default function StorePage() {
       const searchWords = lowercasedSearch.split(/\s+/);
 
       const filtered = recipeBooks.filter((book) => {
-        const bookTitle = book.itemName.toLowerCase();
-        const authorName = book.author ? book.author.toLowerCase() : '';
+        const bookTitle = book.name.toLowerCase();
+        const authorName = book.author.toLowerCase();
 
         const titleWords = bookTitle.split(/\s+/);
         const authorWords = authorName.split(/\s+/);
@@ -80,16 +89,16 @@ export default function StorePage() {
   }, [products, searchTerm]);
 
   const subscriptions = products.filter(
-    (product) => product.itemType === 'Subscription'
+    (product) => product.type === 'Subscription'
   );
 
-  const handleAddToCart = (product: Product) => {
-    if (isItemInCart(product.itemID)) {
-      removeFromCart(product.itemID);
+  const handleAddToCart = (product: StoreItem) => {
+    if (isItemInCart(product._id)) {
+      removeFromCart(product._id);
 
       setSnackbarOpen(false);
       setTimeout(() => {
-        setSnackbarMessage(`${product.itemName} removed from cart`);
+        setSnackbarMessage(`${product.name} removed from cart`);
         setSnackbarSeverity('info');
         setSnackbarOpen(true);
       }, 100);
@@ -97,21 +106,22 @@ export default function StorePage() {
     }
 
     addToCart({
-      itemID: product.itemID,
-      itemName: product.itemName,
-      itemType: product.itemType,
+      itemID: product._id,
+      itemName: product.name,
+      itemType: product.type,
       cost: product.cost,
+      recipesId: product.recipesId,
     });
 
     setSnackbarOpen(false);
     setTimeout(() => {
-      setSnackbarMessage(`${product.itemName} added to cart`);
+      setSnackbarMessage(`${product.name} added to cart`);
       setSnackbarSeverity('success');
       setSnackbarOpen(true);
     }, 100);
   };
 
-  const handleShowDetails = (product: Product) => {
+  const handleShowDetails = (product: StoreItem) => {
     setSelectedProduct(product);
     setDetailsModalOpen(true);
   };
@@ -126,6 +136,18 @@ export default function StorePage() {
 
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false);
+  };
+
+  const handleCreateSuccess = () => {
+    const fetchProducts = async () => {
+      try {
+        const items = await storeApi.getAllItems();
+        setProducts(items);
+      } catch (error) {
+        console.error('Error fetching store items:', error);
+      }
+    };
+    fetchProducts();
   };
 
   return (
@@ -164,7 +186,7 @@ export default function StorePage() {
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
           {subscriptions.map((product) => (
             <Box
-              key={product.itemID}
+              key={product._id}
               sx={{
                 flexBasis: { xs: '100%', sm: 'calc(50% - 12px)' },
               }}
@@ -191,7 +213,7 @@ export default function StorePage() {
                     }}
                   >
                     <Typography variant="h5" component="div">
-                      {product.itemName}
+                      {product.name}
                     </Typography>
                   </Box>
                   <Typography variant="h4" color="primary" sx={{ mb: 2 }}>
@@ -202,7 +224,7 @@ export default function StorePage() {
                   </Typography>
                   <Divider sx={{ my: 2 }} />
                   <Box sx={{ mb: 2 }}>
-                    {(product.description || []).map((feature, index) => (
+                    {product.description.map((feature, index) => (
                       <Typography
                         key={index}
                         component="div"
@@ -220,16 +242,16 @@ export default function StorePage() {
                     fullWidth
                     sx={{ borderRadius: 2 }}
                     startIcon={
-                      isItemInCart(product.itemID) ? (
+                      isItemInCart(product._id) ? (
                         <CheckCircle />
                       ) : (
                         <ShoppingCart />
                       )
                     }
                     onClick={() => handleAddToCart(product)}
-                    color={isItemInCart(product.itemID) ? 'success' : 'primary'}
+                    color={isItemInCart(product._id) ? 'success' : 'primary'}
                   >
-                    {isItemInCart(product.itemID) ? 'Remove' : 'Add to Cart'}
+                    {isItemInCart(product._id) ? 'Remove' : 'Add to Cart'}
                   </Button>
                 </CardActions>
               </Card>
@@ -245,80 +267,51 @@ export default function StorePage() {
           <Typography variant="h4" component="h2">
             Recipe Books
           </Typography>
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => setCreateModalOpen(true)}
+            sx={{ ml: 'auto', borderRadius: 2 }}
+          >
+            Create Recipe Book
+          </Button>
         </Box>
         <Typography variant="body1" sx={{ mb: 3 }}>
-          Explore our collection of curated recipe books
+          Explore our curated collection of recipe books
         </Typography>
 
-        {/* Search Bar */}
-        <Box sx={{ maxWidth: 500, mx: 'auto', mb: 4 }}>
-          <SearchBar
-            onSearch={handleSearch}
-            placeholder="Search recipe books by title or author..."
-          />
+        <Box sx={{ mb: 3 }}>
+          <SearchBar onSearch={handleSearch} />
         </Box>
 
-        {filteredRecipeBooks.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 4 }}>
-            <Typography variant="body1" color="text.secondary">
-              No recipe books found matching your search.
-            </Typography>
-          </Box>
-        ) : (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-            {filteredRecipeBooks.map((product) => (
-              <Box
-                key={product.itemID}
-                sx={{
-                  flexBasis: {
-                    xs: '100%',
-                    sm: 'calc(50% - 12px)',
-                    md: 'calc(33.333% - 16px)',
-                  },
-                }}
-              >
-                <RecipeBookCard
-                  product={{
-                    itemID: product.itemID,
-                    itemName: product.itemName,
-                    author: product.author || 'MealMate',
-                    itemType: product.itemType,
-                    cost: product.cost,
-                    recipesId: product.recipesId || [],
-                    description: product.description,
-                  }}
-                  onShowDetails={handleShowDetails}
-                  onAddToCart={handleAddToCart}
-                />
-              </Box>
-            ))}
-          </Box>
-        )}
-      </Box>
-
-      {/* Details Modal */}
-      {selectedProduct && (
-        <RecipeDetailsModal
-          open={detailsModalOpen}
-          onClose={handleCloseDetailsModal}
-          product={{
-            itemID: selectedProduct.itemID,
-            itemName: selectedProduct.itemName,
-            author: selectedProduct.author || 'MealMate',
-            itemType: selectedProduct.itemType,
-            cost: selectedProduct.cost,
-            recipesId: selectedProduct.recipesId || [],
-            description: selectedProduct.description,
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: 'repeat(2, 1fr)',
+              md: 'repeat(3, 1fr)',
+            },
+            gap: 3,
           }}
-          onAddToCart={handleAddToCart}
-        />
-      )}
+        >
+          {filteredRecipeBooks.map((book) => (
+            <RecipeBookCard
+              key={book._id}
+              book={book}
+              onAddToCart={handleAddToCart}
+              onShowDetails={handleShowDetails}
+              isInCart={isItemInCart(book._id)}
+            />
+          ))}
+        </Box>
+      </Box>
 
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         <Alert
           onClose={handleCloseSnackbar}
@@ -328,6 +321,22 @@ export default function StorePage() {
           {snackbarMessage}
         </Alert>
       </Snackbar>
+
+      {selectedProduct && (
+        <RecipeDetailsModal
+          open={detailsModalOpen}
+          onClose={handleCloseDetailsModal}
+          product={selectedProduct}
+          onAddToCart={handleAddToCart}
+          isInCart={isItemInCart(selectedProduct._id)}
+        />
+      )}
+
+      <CreateRecipeBookModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        onSuccess={handleCreateSuccess}
+      />
     </Container>
   );
 }

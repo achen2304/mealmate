@@ -1,55 +1,32 @@
-# MealMate - AI Powered Recipe and Grocery Helper
-
-An app to simplify
+# MealMate - Recipe and Grocery Helper
 
 ## Description
 
-An App that stores recipes that are created by yourself or imported from the web.
+An app to simplify storing recipes, buying ingredients, and a marketplace for recipe books.
 
 ## Tech Stack
 
 - Frontend
-  - Vite
   - React
   - Next.js
   - TypeScript
   - Material UI
 - Backend
+  - Node.js
   - Express.js
   - MongoDB
 
 ## Feature List
 
-#### Frontend
-
 - [x] User authentication
-- [ ] All recipes page
-  - [ ] import recipe from the web
-  - [ ] individual recipes page
-    - [ ] checklist for cooking
-- [ ] Store Section
-  - [ ] recipe packs
-  - [ ] premium plans
-- [ ] Grocery Mode
-  - [ ] Shop for certain recipes
-- [ ] AI stuff
-  - [ ] suggestions for alternatives ingredients or more recipes
-
-#### Backend
-
-- [ ] User authentication
-- [ ] All recipes page
-  - [ ] import recipe from the web
-  - [ ] individual recipes page
-    - [ ] checklist for cooking
-- [ ] Store Section
-  - [ ] recipe packs
-  - [ ] premium plans
-- [ ] Grocery Mode
-  - [ ] Shop for certain recipes
-- [ ] AI stuff
-  - [ ] suggestions for alternatives ingredients or more recipes
-
+- [x] All recipes page
+  - [x] individual recipes page
+    - [x] checklist for cooking
+- [x] Store Section
+  - [x] recipe packs
+  - [x] premium plans
+- [x] Grocery Mode
+  - [x] Shop for certain recipe books
 
 ## Getting Started
 
@@ -63,9 +40,12 @@ An App that stores recipes that are created by yourself or imported from the web
 #### Development mode:
 
 ```
-cd mealmate/mn_1
-npm install
-npm run dev:all
+- cd mn_1/frontend
+- npm install
+- cd ../backend
+- npm install
+- create .env file with mongoDB specifications
+- npm run dev:all
 ```
 
 ## Authors
@@ -78,4 +58,4 @@ npm run dev:all
 
 ## License
 
-This project is licensed under the [NAME HERE] License - see the LICENSE.md file for details
+This project is licensed under the MIT License - see the LICENSE.md file for details

@@ -4,6 +4,8 @@ import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CircularProgress, Box, Typography, Button } from '@mui/material';
 
+// Redirect page for the app for protected routes
+
 export default function Redirect() {
   const router = useRouter();
   const searchParams = useSearchParams();
