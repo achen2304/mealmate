@@ -5,6 +5,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import { useState } from 'react';
 
+// Generic search bar for the app
+
 interface RecipeSearchProps {
   onSearch: (searchText: string) => void;
   placeholder?: string;
@@ -16,17 +18,20 @@ export default function SearchBar({
 }: RecipeSearchProps) {
   const [searchText, setSearchText] = useState('');
 
+  // Handle the search input change
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = event.target.value;
     setSearchText(newValue);
     onSearch(newValue);
   };
 
+  // Handle the clear search button
   const handleClearSearch = () => {
     setSearchText('');
     onSearch('');
   };
 
+  // Render the search bar
   return (
     <Box sx={{ width: '100%' }}>
       <TextField

@@ -15,7 +15,9 @@ import {
 } from '@mui/material';
 import { useCart } from '@/context/cartContext';
 import { useRouter } from 'next/navigation';
- 
+import { useAuth } from '@/context/userAuth';
+import { recipeApi } from '@/lib/recipeapi';
+
 type FormErrors = {
   cardName: string;
   cardNumber: string;
@@ -32,9 +34,18 @@ type FormData = {
   email: string;
 };
 
+interface CartItem {
+  itemID: string;
+  itemName: string;
+  itemType: string;
+  cost: number;
+  recipesId?: string[];
+}
+
 export default function CheckoutPage() {
   const router = useRouter();
   const { cartItems, clearCart } = useCart();
+  const { user } = useAuth();
 
   const [formData, setFormData] = useState<FormData>({
     cardName: '',
@@ -126,7 +137,7 @@ export default function CheckoutPage() {
     return isValid;
   };
 
-  const handlePlaceOrder = (e: React.FormEvent) => {
+  const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (validateForm()) {
@@ -148,10 +159,34 @@ export default function CheckoutPage() {
 
       sessionStorage.setItem('lastOrder', JSON.stringify(orderDetails));
 
-      setTimeout(() => {
-        clearCart();
-        router.push('/confirmation');
-      }, 1000);
+      // Debug: log cart items to check recipesId
+      console.log('Cart items at checkout:', cartItems);
+
+      if (user?._id) {
+        try {
+          const recipeIds = cartItems
+            .filter(
+              (item: CartItem) => item.recipesId && item.recipesId.length > 0
+            )
+            .flatMap((item: CartItem) => item.recipesId || []);
+
+          const userRecipes = await recipeApi.getUserRecipes(user._id);
+          const existingRecipeIds = userRecipes.map(
+            (recipe: { _id: string }) => recipe._id
+          );
+
+          for (const recipeId of recipeIds) {
+            if (!existingRecipeIds.includes(recipeId)) {
+              await recipeApi.addRecipeToUser(user._id, recipeId);
+            }
+          }
+        } catch (error) {
+          console.error('Error adding recipes to user account:', error);
+        }
+      }
+
+      clearCart();
+      router.push('/confirmation');
     }
   };
 

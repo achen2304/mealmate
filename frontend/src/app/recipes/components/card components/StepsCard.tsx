@@ -12,6 +12,8 @@ import {
   Button,
 } from '@mui/material';
 
+// Steps card for the app
+
 interface Step {
   id: string;
   instruction: string;
@@ -32,6 +34,7 @@ export default function StepsCard({ steps, recipeId }: StepsCardProps) {
 
   const storageKey = recipeId ? `recipe-${recipeId}-steps` : null;
 
+  // Load the steps Status from localStorage
   useEffect(() => {
     if (isClient && storageKey) {
       try {
@@ -48,6 +51,7 @@ export default function StepsCard({ steps, recipeId }: StepsCardProps) {
     }
   }, [storageKey, isClient]);
 
+  // Save the steps Status to localStorage if it changes
   useEffect(() => {
     if (isClient && storageKey) {
       try {
@@ -59,6 +63,7 @@ export default function StepsCard({ steps, recipeId }: StepsCardProps) {
     }
   }, [checkedSteps, storageKey, isClient]);
 
+  // Handle the toggle step for the app
   const handleToggleStep = (id: string) => {
     setCheckedSteps((prev) => {
       if (prev.includes(id)) {
@@ -69,10 +74,12 @@ export default function StepsCard({ steps, recipeId }: StepsCardProps) {
     });
   };
 
+  // Handle the clear all for the app
   const handleClearAll = () => {
     setCheckedSteps([]);
   };
 
+  // Render the steps card for the app if there are no steps
   if (!steps || steps.length === 0) {
     return (
       <Card sx={{ mb: 3 }}>
@@ -97,6 +104,7 @@ export default function StepsCard({ steps, recipeId }: StepsCardProps) {
     );
   }
 
+  // Render the steps card for the app if there are steps
   return (
     <Card sx={{ mb: 3 }}>
       <CardContent>

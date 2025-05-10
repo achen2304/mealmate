@@ -46,7 +46,7 @@ export default function RecipeBookCard({
         </Typography>
         <Typography variant="body2" color="text.secondary" gutterBottom>
           by {book.author}
-        </Typography>
+          </Typography>
         <Typography variant="h5" color="primary" sx={{ my: 2 }}>
           ${book.cost.toFixed(2)}
         </Typography>
@@ -56,24 +56,24 @@ export default function RecipeBookCard({
       </CardContent>
       <CardActions sx={{ p: 2, pt: 0 }}>
         <Box sx={{ display: 'flex', gap: 1, width: '100%' }}>
-          <Button
+        <Button
             variant="outlined"
             fullWidth
             onClick={() => onShowDetails(book)}
             sx={{ borderRadius: 2 }}
-          >
+        >
             View Details
-          </Button>
-          <Button
-            variant="contained"
+        </Button>
+        <Button
+          variant="contained"
             fullWidth
             startIcon={isInCart ? <CheckCircle /> : <ShoppingCart />}
             onClick={() => onAddToCart(book)}
             color={isInCart ? 'success' : 'primary'}
             sx={{ borderRadius: 2 }}
-          >
+        >
             {isInCart ? 'Remove' : 'Add to Cart'}
-          </Button>
+        </Button>
         </Box>
       </CardActions>
     </Card>

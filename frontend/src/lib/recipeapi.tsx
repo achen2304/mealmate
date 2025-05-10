@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+// API calls for recipes
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
 export interface Recipe {
@@ -8,7 +10,7 @@ export interface Recipe {
   description: string;
   ingredients: {
     name: string;
-    amount: number;
+    amount: string;
     unit: string;
     type: string;
   }[];

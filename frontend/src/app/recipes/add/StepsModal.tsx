@@ -14,6 +14,8 @@ import {
   ListItemSecondaryAction,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { useState } from 'react';
 
 interface Step {
@@ -51,6 +53,23 @@ export default function StepsModal({
 
   const handleDeleteStep = (id: string) => {
     setCurrentSteps(currentSteps.filter((step) => step.id !== id));
+  };
+
+  const handleMoveStep = (index: number, direction: 'up' | 'down') => {
+    if (
+      (direction === 'up' && index === 0) ||
+      (direction === 'down' && index === currentSteps.length - 1)
+    ) {
+      return;
+    }
+
+    const newSteps = [...currentSteps];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    [newSteps[index], newSteps[newIndex]] = [
+      newSteps[newIndex],
+      newSteps[index],
+    ];
+    setCurrentSteps(newSteps);
   };
 
   const handleSave = () => {
@@ -105,13 +124,30 @@ export default function StepsModal({
                   }}
                 >
                   <ListItemText
-                    primary={`Step ${index + 1}`}
-                    secondary={step.instruction}
+                    primary={step.instruction}
+                    secondary={`Step ${index + 1}`}
                   />
-                  <ListItemSecondaryAction>
+                  <ListItemSecondaryAction sx={{ display: 'flex', gap: 1 }}>
+                    <IconButton
+                      edge="end"
+                      onClick={() => handleMoveStep(index, 'up')}
+                      disabled={index === 0}
+                      size="small"
+                    >
+                      <ArrowUpwardIcon />
+                    </IconButton>
+                    <IconButton
+                      edge="end"
+                      onClick={() => handleMoveStep(index, 'down')}
+                      disabled={index === currentSteps.length - 1}
+                      size="small"
+                    >
+                      <ArrowDownwardIcon />
+                    </IconButton>
                     <IconButton
                       edge="end"
                       onClick={() => handleDeleteStep(step.id)}
+                      size="small"
                     >
                       <DeleteIcon />
                     </IconButton>

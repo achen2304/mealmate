@@ -9,16 +9,19 @@ import {
   Chip,
   Divider,
   IconButton,
+  Button,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import EditIcon from '@mui/icons-material/Edit';
 import { useRouter, useParams } from 'next/navigation';
-import IngredientCard from '../card components/IngredientCard';
-import StepsCard from '../card components/StepsCard';
+import { useAuth } from '@/context/userAuth';
+import IngredientCard from '../components/card components/IngredientCard';
+import StepsCard from '../components/card components/StepsCard';
 import { recipeApi } from '../../../lib/recipeapi';
 
 interface Ingredient {
   name: string;
-  amount: number;
+  amount: string;
   unit: string;
   type: string;
 }
@@ -41,6 +44,7 @@ interface Recipe {
 export default function Recipe() {
   const router = useRouter();
   const params = useParams();
+  const { user } = useAuth();
   const recipeId = params?.id as string;
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
@@ -65,7 +69,11 @@ export default function Recipe() {
   }, [recipeId]);
 
   const handleBack = () => {
-    router.back();
+    router.push(`/recipes/`);
+  };
+
+  const handleEdit = () => {
+    router.push(`/recipes/edit/${recipeId}`);
   };
 
   if (loading) {
@@ -90,9 +98,18 @@ export default function Recipe() {
         <IconButton onClick={handleBack} sx={{ mr: 2 }}>
           <ArrowBackIcon />
         </IconButton>
-        <Typography variant="h4" component="h1">
+        <Typography variant="h4" component="h1" sx={{ flexGrow: 1 }}>
           {recipe.title}
         </Typography>
+        {user?._id === recipe.author && (
+          <Button
+            variant="contained"
+            startIcon={<EditIcon />}
+            onClick={handleEdit}
+          >
+            Edit Recipe
+          </Button>
+        )}
       </Box>
 
       <Paper elevation={2} sx={{ p: 3, mb: 4 }}>

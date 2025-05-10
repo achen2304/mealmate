@@ -16,17 +16,16 @@ import {
   SelectChangeEvent,
   IconButton,
   Alert,
-  Snackbar,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import IngredientsModal from './IngredientsModal';
-import StepsModal from './StepsModal';
-import IngredientCard from '../components/card components/IngredientCard';
-import StepsCard from '../components/card components/StepsCard';
-import { recipeApi } from '../../../lib/recipeapi';
-import { useAuth } from '../../../context/userAuth';
+import { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { useAuth } from '@/context/userAuth';
+import IngredientsModal from '../../add/IngredientsModal';
+import StepsModal from '../../add/StepsModal';
+import IngredientCard from '../../components/card components/IngredientCard';
+import StepsCard from '../../components/card components/StepsCard';
+import { recipeApi } from '@/lib/recipeapi';
 
 const RECIPE_TAGS = [
   'breakfast',
@@ -55,9 +54,12 @@ interface Step {
   instruction: string;
 }
 
-export default function AddRecipe() {
+export default function EditRecipe() {
   const router = useRouter();
+  const params = useParams();
   const { user } = useAuth();
+  const recipeId = params?.id as string;
+
   const [recipeName, setRecipeName] = useState('');
   const [description, setDescription] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -65,9 +67,46 @@ export default function AddRecipe() {
   const [steps, setSteps] = useState<Step[]>([]);
   const [ingredientsModalOpen, setIngredientsModalOpen] = useState(false);
   const [stepsModalOpen, setStepsModalOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    const fetchRecipe = async () => {
+      try {
+        const recipe = await recipeApi.getRecipe(recipeId);
+        if (recipe.author !== user?._id) {
+          router.push('/recipes');
+          return;
+        }
+        setRecipeName(recipe.title);
+        setDescription(recipe.description);
+        setSelectedTags(recipe.tags || []);
+        setIngredients(
+          recipe.ingredients.map((ing, idx) => ({
+            ...ing,
+            id: `${ing.name}-${idx}`,
+            amount: ing.amount.toString(),
+          }))
+        );
+        setSteps(
+          recipe.steps.map((step, idx) => ({
+            id: `step-${idx}`,
+            instruction: step.instruction,
+          }))
+        );
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to load recipe');
+        setLoading(false);
+      }
+    };
+
+    if (recipeId) {
+      fetchRecipe();
+    }
+  }, [recipeId, user, router]);
 
   const handleTagChange = (event: SelectChangeEvent<typeof selectedTags>) => {
     const {
@@ -87,7 +126,7 @@ export default function AddRecipe() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
-      setError('You must be logged in to create a recipe');
+      setError('You must be logged in to edit a recipe');
       return;
     }
 
@@ -105,7 +144,6 @@ export default function AddRecipe() {
       setLoading(true);
       setError(null);
 
-      // Convert ingredients to the correct format
       const formattedIngredients = ingredients.map((ing) => ({
         name: ing.name,
         amount: ing.amount,
@@ -113,39 +151,53 @@ export default function AddRecipe() {
         type: ing.type,
       }));
 
-      // Convert steps to the correct format
       const formattedSteps = steps.map((step, index) => ({
         number: index + 1,
         instruction: step.instruction,
       }));
 
-      const recipeData = {
+      await recipeApi.updateRecipe(recipeId, {
         title: recipeName,
         description,
         ingredients: formattedIngredients,
         steps: formattedSteps,
         tags: selectedTags,
-        author: user._id,
-      };
+      });
 
-      await recipeApi.createRecipe(recipeData);
       setSuccess(true);
-
-      // Redirect after a short delay to show success message
       setTimeout(() => {
-        router.push('/recipes');
+        router.push(`/recipes/${recipeId}`);
       }, 1500);
     } catch (err) {
-      setError('Failed to create recipe. Please try again.');
-      console.error('Error creating recipe:', err);
+      setError('Failed to update recipe. Please try again.');
+      console.error('Error updating recipe:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await recipeApi.deleteRecipe(recipeId);
+      router.push('/recipes');
+    } catch (err) {
+      setDeleting(false);
+      setError('Failed to delete recipe.');
     }
   };
 
   const handleCancel = () => {
     router.back();
   };
+
+  if (loading) {
+    return (
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Typography>Loading recipe...</Typography>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -154,7 +206,7 @@ export default function AddRecipe() {
           <ArrowBackIcon />
         </IconButton>
         <Typography variant="h4" component="h1">
-          Add New Recipe
+          Edit Recipe
         </Typography>
       </Box>
 
@@ -270,29 +322,44 @@ export default function AddRecipe() {
               )}
             </Box>
 
+            {error && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                {error}
+              </Alert>
+            )}
+
+            {success && (
+              <Alert severity="success" sx={{ mt: 2 }}>
+                Recipe updated successfully!
+              </Alert>
+            )}
+
             <Box
               sx={{
+                mt: 3,
                 display: 'flex',
-                justifyContent: 'flex-end',
                 gap: 2,
-                mt: 2,
+                justifyContent: 'flex-end',
               }}
             >
-              <Button onClick={handleCancel} disabled={loading}>
+              <Button
+                color="error"
+                variant="outlined"
+                onClick={handleDelete}
+                disabled={deleting}
+              >
+                {deleting ? 'Deleting...' : 'Delete'}
+              </Button>
+
+              <Button
+                variant="outlined"
+                onClick={handleCancel}
+                disabled={loading}
+              >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={
-                  loading ||
-                  !recipeName ||
-                  !description ||
-                  ingredients.length === 0 ||
-                  steps.length === 0
-                }
-              >
-                {loading ? 'Saving...' : 'Save Recipe'}
+              <Button type="submit" variant="contained" disabled={loading}>
+                Save Changes
               </Button>
             </Box>
           </Box>
@@ -303,9 +370,7 @@ export default function AddRecipe() {
         open={ingredientsModalOpen}
         onClose={() => setIngredientsModalOpen(false)}
         ingredients={ingredients}
-        onSaveIngredients={(ingredients: Ingredient[]) =>
-          setIngredients(ingredients)
-        }
+        onSaveIngredients={setIngredients}
       />
 
       <StepsModal
@@ -314,26 +379,6 @@ export default function AddRecipe() {
         steps={steps}
         onSaveSteps={setSteps}
       />
-
-      <Snackbar
-        open={!!error}
-        autoHideDuration={6000}
-        onClose={() => setError(null)}
-      >
-        <Alert severity="error" onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      </Snackbar>
-
-      <Snackbar
-        open={success}
-        autoHideDuration={1500}
-        onClose={() => setSuccess(false)}
-      >
-        <Alert severity="success" onClose={() => setSuccess(false)}>
-          Recipe created successfully!
-        </Alert>
-      </Snackbar>
     </Container>
   );
 }

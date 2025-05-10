@@ -15,9 +15,11 @@ import RestaurantIcon from '@mui/icons-material/Restaurant';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Cart from '@mui/icons-material/ShoppingCart';
-import RecipeCard from './recipes/card components/recipeCard';
+import RecipeCard from './recipes/components/card components/recipeCard';
 import { useEffect, useState } from 'react';
 import { recipeApi, Recipe as BackendRecipe } from '../lib/recipeapi';
+
+// Home page for the app
 
 export default function Home() {
   const theme = useTheme();
@@ -26,13 +28,14 @@ export default function Home() {
   const [recentRecipes, setRecentRecipes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  /* Get the user's recipes and sort them by updatedAt or createdAt descending
+  This is used to display the user's 3 most recent recipes on the home page */
   useEffect(() => {
     if (user) {
       setLoading(true);
       recipeApi
         .getUserRecipes(user._id)
         .then((recipes) => {
-          // Sort by updatedAt or createdAt descending
           const sorted = [...recipes].sort(
             (a, b) =>
               new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
@@ -49,21 +52,26 @@ export default function Home() {
     }
   }, [user]);
 
+  // Navigate to the auth page with the mode (login or signup)
   const handleAuthNavigation = (mode: 'login' | 'signup') => {
     router.push(`/auth?mode=${mode}`);
   };
 
+  // Navigate to the recipe page with the recipe ID
   const handleRecipeNavigation = (recipeId: string) => {
     router.push(`/recipes/${recipeId}`);
   };
 
+  // Navigate to the recipe page
   const handleViewAllRecipes = () => {
     router.push('/recipes');
   };
 
+  // If the user is logged in, display the home page
   if (user) {
     return (
       <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
+        {/* Main Card container */}
         <Paper
           elevation={0}
           sx={{
@@ -133,6 +141,7 @@ export default function Home() {
             </Box>
           </Box>
         </Paper>
+
         {/* Quick Links */}
         <Typography
           variant="h5"
@@ -219,7 +228,7 @@ export default function Home() {
           </Box>
         </Box>
 
-        {/* Recipe Section */}
+        {/* Recent Recipes Section */}
         <Box sx={{ mb: 6 }}>
           <Box
             sx={{
@@ -273,6 +282,7 @@ export default function Home() {
   }
 
   return (
+    // If the user is not logged in, display the landing page
     <Box
       sx={{
         position: 'relative',

@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { isProtectedRoute } from './authRedirect';
 
+// This component is used to protect routes that require authentication
 export default function ProtectedRoute({
   children,
 }: {

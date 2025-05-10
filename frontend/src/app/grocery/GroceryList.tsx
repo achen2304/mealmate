@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Box,
   Card,
@@ -11,13 +11,18 @@ import {
   Checkbox,
   Divider,
 } from '@mui/material';
- 
+
 interface Ingredient {
   id: string;
   name: string;
   amount: string | number;
-  unit: string;
-  quantities?: Array<{ amount: string | number; unit: string }>;
+}
+
+interface CombinedIngredient {
+  id: string;
+  name: string;
+  amounts: (string | number)[];
+  originalIds: string[];
 }
 
 interface GroceryListProps {
@@ -27,24 +32,52 @@ interface GroceryListProps {
 export default function GroceryList({ ingredients }: GroceryListProps) {
   const [checkedIngredients, setCheckedIngredients] = useState<string[]>([]);
 
-  const handleToggleIngredient = (id: string) => {
-    setCheckedIngredients((prev) => {
-      if (prev.includes(id)) {
-        return prev.filter((item) => item !== id);
+  const combinedIngredients = useMemo(() => {
+    const combined: { [key: string]: CombinedIngredient } = {};
+
+    ingredients.forEach((ingredient) => {
+      const normalizedName = ingredient.name.toLowerCase().trim();
+
+      if (!combined[normalizedName]) {
+        combined[normalizedName] = {
+          id: ingredient.id,
+          name: ingredient.name,
+          amounts: [ingredient.amount],
+          originalIds: [ingredient.id],
+        };
       } else {
-        return [...prev, id];
+        combined[normalizedName].amounts.push(ingredient.amount);
+        combined[normalizedName].originalIds.push(ingredient.id);
       }
     });
-  };
 
-  const formatQuantities = (ingredient: Ingredient): string => {
-    if (!ingredient.quantities || ingredient.quantities.length === 0) {
-      return `${ingredient.amount} ${ingredient.unit}`;
-    }
+    return Object.values(combined);
+  }, [ingredients]);
 
-    return ingredient.quantities
-      .map((q) => `${q.amount} ${q.unit}`)
-      .join(' + ');
+  const sortedIngredients = useMemo(() => {
+    return [...combinedIngredients].sort((a, b) => {
+      const aChecked = a.originalIds.every((id) =>
+        checkedIngredients.includes(id)
+      );
+      const bChecked = b.originalIds.every((id) =>
+        checkedIngredients.includes(id)
+      );
+      if (aChecked !== bChecked) {
+        return aChecked ? 1 : -1;
+      }
+      return a.name.localeCompare(b.name);
+    });
+  }, [combinedIngredients, checkedIngredients]);
+
+  const handleToggleIngredient = (originalIds: string[]) => {
+    setCheckedIngredients((prev) => {
+      const allChecked = originalIds.every((id) => prev.includes(id));
+      if (allChecked) {
+        return prev.filter((id) => !originalIds.includes(id));
+      } else {
+        return [...prev, ...originalIds.filter((id) => !prev.includes(id))];
+      }
+    });
   };
 
   if (!ingredients || ingredients.length === 0) {
@@ -70,45 +103,49 @@ export default function GroceryList({ ingredients }: GroceryListProps) {
         </Typography>
         <Divider sx={{ mb: 2 }} />
         <List dense disablePadding>
-          {ingredients.map((ingredient) => (
-            <ListItem
-              key={ingredient.id}
-              disablePadding
-              sx={{
-                py: 0.5,
-                opacity: checkedIngredients.includes(ingredient.id) ? 0.6 : 1,
-                cursor: 'pointer',
-              }}
-              onClick={() => handleToggleIngredient(ingredient.id)}
-            >
-              <ListItemIcon sx={{ minWidth: 36 }}>
-                <Checkbox
-                  edge="start"
-                  checked={checkedIngredients.includes(ingredient.id)}
-                  onChange={(e) => {
-                    e.stopPropagation();
-                    handleToggleIngredient(ingredient.id);
-                  }}
-                  size="small"
-                />
-              </ListItemIcon>
-              <ListItemText
-                primary={
-                  <Typography
-                    variant="body1"
-                    component="span"
-                    sx={{
-                      textDecoration: checkedIngredients.includes(ingredient.id)
-                        ? 'line-through'
-                        : 'none',
+          {sortedIngredients.map((ingredient) => {
+            const isChecked = ingredient.originalIds.every((id) =>
+              checkedIngredients.includes(id)
+            );
+
+            return (
+              <ListItem
+                key={ingredient.id}
+                disablePadding
+                sx={{
+                  py: 0.5,
+                  opacity: isChecked ? 0.6 : 1,
+                  cursor: 'pointer',
+                }}
+                onClick={() => handleToggleIngredient(ingredient.originalIds)}
+              >
+                <ListItemIcon sx={{ minWidth: 36 }}>
+                  <Checkbox
+                    edge="start"
+                    checked={isChecked}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      handleToggleIngredient(ingredient.originalIds);
                     }}
-                  >
-                    {`${ingredient.name} (${formatQuantities(ingredient)})`}
-                  </Typography>
-                }
-              />
-            </ListItem>
-          ))}
+                    size="small"
+                  />
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <Typography
+                      variant="body1"
+                      component="span"
+                      sx={{
+                        textDecoration: isChecked ? 'line-through' : 'none',
+                      }}
+                    >
+                      {`${ingredient.name} (${ingredient.amounts.join(' + ')})`}
+                    </Typography>
+                  }
+                />
+              </ListItem>
+            );
+          })}
         </List>
       </CardContent>
     </Card>
