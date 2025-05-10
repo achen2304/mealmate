@@ -35,9 +35,7 @@ An app to simplify storing recipes, buying ingredients, and a marketplace for re
 - Node.js 20+
 - npm/yarn
 
-### Installing
-
-#### Development mode:
+### Installing/Development mode
 
 ```
 - cd mn_1/frontend
@@ -47,6 +45,41 @@ An app to simplify storing recipes, buying ingredients, and a marketplace for re
 - create .env file with mongoDB specifications
 - npm run dev:all
 ```
+
+### Api Endpoints
+
+#### Recipes
+
+| Method | Endpoint         | Description           |
+| ------ | ---------------- | --------------------- |
+| GET    | /api/recipes     | Get all recipes       |
+| GET    | /api/recipes/:id | Get a recipe by ID    |
+| POST   | /api/recipes     | Create a new recipe   |
+| PUT    | /api/recipes/:id | Update a recipe by ID |
+| DELETE | /api/recipes/:id | Delete a recipe by ID |
+
+#### Users
+
+| Method | Endpoint               | Description                              |
+| ------ | ---------------------- | ---------------------------------------- |
+| POST   | /api/users/register    | Register a new user                      |
+| POST   | /api/users/login       | Login a user                             |
+| GET    | /api/users/:id         | Get user by ID                           |
+| PUT    | /api/users/:id         | Update user by ID                        |
+| DELETE | /api/users/:id         | Delete user by ID                        |
+| GET    | /api/users/:id/recipes | Get all recipes for a user               |
+| POST   | /api/users/:id/recipes | Add a recipe to a user's collection      |
+| DELETE | /api/users/:id/recipes | Remove a recipe from a user's collection |
+
+#### Store/Market
+
+| Method | Endpoint       | Description               |
+| ------ | -------------- | ------------------------- |
+| GET    | /api/store     | Get all store items       |
+| GET    | /api/store/:id | Get a store item by ID    |
+| POST   | /api/store     | Create a new store item   |
+| PUT    | /api/store/:id | Update a store item by ID |
+| DELETE | /api/store/:id | Delete a store item by ID |
 
 ## Authors
 
