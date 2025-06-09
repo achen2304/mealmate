@@ -52,6 +52,15 @@ export default function AuthPage() {
               ? 'Sign in to your account'
               : 'Create your account'}
           </Typography>
+          <Typography variant="body1" color="text.error" sx={{ mt: 1 }}>
+            DO NOT PUT REAL PASSWORDS HERE, HERE IS NO SECURITY.
+            <br />
+            SIGN IN USING A TEST ACCOUNT:
+            <br />
+            Email: test@test.com
+            <br />
+            Password: Password123
+          </Typography>
         </Box>
 
         <AuthForm mode={mode} onToggleMode={toggleMode} />

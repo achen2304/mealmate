@@ -15,6 +15,7 @@ An app to simplify storing recipes, buying ingredients, and a marketplace for re
   - Node.js
   - Express.js
   - MongoDB
+  - Vercel Serverless Functions
 
 ## Feature List
 
@@ -45,6 +46,19 @@ An app to simplify storing recipes, buying ingredients, and a marketplace for re
 - create .env file with mongoDB specifications
 - npm run dev:all
 ```
+
+### Deployment on Vercel
+
+The application is configured to deploy on Vercel with serverless functionality:
+
+1. Push your code to a GitHub repository
+2. Connect the repository to Vercel
+3. Vercel will automatically detect the configuration in `vercel.json`
+4. Set the following environment variables in Vercel:
+   - `MONGODB_URI`: Your MongoDB connection string
+   - Any other environment variables needed by your application
+
+Vercel will automatically build and deploy both the frontend and the serverless API functions.
 
 ### Api Endpoints
 
@@ -80,6 +94,13 @@ An app to simplify storing recipes, buying ingredients, and a marketplace for re
 | POST   | /api/store     | Create a new store item   |
 | PUT    | /api/store/:id | Update a store item by ID |
 | DELETE | /api/store/:id | Delete a store item by ID |
+
+#### Serverless API Endpoints
+
+| Method | Endpoint   | Description      |
+| ------ | ---------- | ---------------- |
+| GET    | /api       | API health check |
+| GET    | /api/meals | Get all meals    |
 
 ## Authors
 
