@@ -5,16 +5,13 @@ const nextConfig = {
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination:
-          process.env.NODE_ENV === 'production'
-            ? '/api/:path*' // In production, route to Vercel serverless functions
-            : 'http://localhost:8080/api/:path*', // In development, route to local backend
-      },
-    ];
+  // Make sure the output is exported as a standalone app
+  output: 'standalone',
+  // Explicitly set trailingSlash to false
+  trailingSlash: false,
+  // Configure webpack to handle assets correctly
+  webpack: (config) => {
+    return config;
   },
 };
 
