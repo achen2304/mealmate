@@ -7,7 +7,12 @@ const app = express();
 // CORS configuration
 app.use(
   cors({
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'mealmate.czchen.dev',
+      'https://mealmate-three.vercel.app',
+    ],
     credentials: true,
   })
 );
