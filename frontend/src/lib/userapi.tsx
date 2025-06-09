@@ -2,7 +2,13 @@ import axios from 'axios';
 
 // API calls for user authentication
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+// In production on Vercel, the API will be at the same domain
+const getApiUrl = () => {
+  if (process.env.NODE_ENV === 'production') {
+    return '/api';
+  }
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+};
 
 const userApi = {
   register: async (userData: {
@@ -11,7 +17,10 @@ const userApi = {
     name: string;
   }) => {
     try {
-      const response = await axios.post(`${API_URL}/users/register`, userData);
+      const response = await axios.post(
+        `${getApiUrl()}/users/register`,
+        userData
+      );
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Registration failed');
@@ -20,7 +29,10 @@ const userApi = {
 
   login: async (credentials: { email: string; password: string }) => {
     try {
-      const response = await axios.post(`${API_URL}/users/login`, credentials);
+      const response = await axios.post(
+        `${getApiUrl()}/users/login`,
+        credentials
+      );
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Login failed');
@@ -29,7 +41,7 @@ const userApi = {
 
   getUser: async (userId: string) => {
     try {
-      const response = await axios.get(`${API_URL}/users/${userId}`);
+      const response = await axios.get(`${getApiUrl()}/users/${userId}`);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'User not found');
@@ -47,7 +59,10 @@ const userApi = {
     }
   ) => {
     try {
-      const response = await axios.put(`${API_URL}/users/${userId}`, userData);
+      const response = await axios.put(
+        `${getApiUrl()}/users/${userId}`,
+        userData
+      );
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'User update failed');
@@ -56,7 +71,7 @@ const userApi = {
 
   deleteUser: async (userId: string) => {
     try {
-      const response = await axios.delete(`${API_URL}/users/${userId}`);
+      const response = await axios.delete(`${getApiUrl()}/users/${userId}`);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'User deletion failed');
