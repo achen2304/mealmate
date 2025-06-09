@@ -54,7 +54,12 @@ const sampleMeals = [
 module.exports = async (req, res) => {
   // Get the origin from the request
   const origin = req.headers.origin;
-  const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001'];
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'mealmate.czchen.dev',
+    'https://mealmate-three.vercel.app',
+  ];
 
   // Set CORS headers
   if (allowedOrigins.includes(origin)) {
