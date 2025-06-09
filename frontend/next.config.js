@@ -9,7 +9,10 @@ const nextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: '/api/:path*',
+        destination:
+          process.env.NODE_ENV === 'production'
+            ? '/api/:path*' // In production, route to Vercel serverless functions
+            : 'http://localhost:8080/api/:path*', // In development, route to local backend
       },
     ];
   },

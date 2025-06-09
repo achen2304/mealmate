@@ -2,8 +2,8 @@ import axios from 'axios';
 
 // Determine the base URL for API calls based on environment
 const getBaseUrl = () => {
-  if (process.env.NODE_ENV === 'production') {
-    // In production, the API is served from the same domain
+  // For client-side requests in production, use relative URLs
+  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
     return '';
   }
 
@@ -19,6 +19,18 @@ const api = axios.create({
   },
   withCredentials: true, // Important for CORS with credentials
 });
+
+// Add request interceptor for debugging
+api.interceptors.request.use(
+  (config) => {
+    console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
+    return config;
+  },
+  (error) => {
+    console.error('API Request Error:', error);
+    return Promise.reject(error);
+  }
+);
 
 // Function to fetch meals from the API
 export const fetchMeals = async () => {
